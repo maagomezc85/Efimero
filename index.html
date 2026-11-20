@@ -1,0 +1,3825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRÓNICAS DEL HUMEDAL | Hemera — Narrativa Transmedia</title>
+<meta name="description" content="Distopía post-humanista bajo el humedal de Bogotá. Hemera, la utopía biotecnológica donde nadie envejece... pero todos mueren a las 24 horas. Proyecto pedagógico transmedia.">
+<meta name="theme-color" content="#061214">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦋</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Space+Grotesk:wght@300;400;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fire: #E67E22;
+    --neon: #FF007F;
+    --cyan: #00E5FF;
+    --bone: #F0F0F0;
+    --offwhite: #E6E1D8;
+    --trench: #A47F62;
+    --armor: #7A573F;
+    --olive: #4D5E4D;
+    --emerald: #10B981;
+    --wing: #8A959D;
+    --bg-dark: #04080a;
+    --card-bg: rgba(12, 18, 24, 0.72);
+    --border-subtle: rgba(255, 255, 255, 0.12);
+  }
+
+  * { box-sizing: border-box; }
+
+  body, html {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    background-color: var(--bg-dark);
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--offwhite);
+    overflow: hidden;
+  }
+
+  /* ===== HUD SUPERIOR ===== */
+  #transmedia-hud {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.85rem 2.2rem;
+    background: linear-gradient(180deg, rgba(4, 8, 10, 0.94) 0%, rgba(4, 8, 10, 0) 100%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0, 229, 255, 0.14);
+    pointer-events: auto;
+  }
+  .hud-brand {
+    display: flex; align-items: center; gap: 0.7rem;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.95rem; letter-spacing: 0.15em;
+    color: var(--bone);
+  }
+  .hud-brand span { color: var(--neon); text-shadow: 0 0 8px var(--neon); }
+  .hud-nav {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+  }
+  .hud-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    color: var(--offwhite);
+    padding: 0.38rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-family: 'Space Grotesk', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+  }
+  .hud-btn:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.35);
+    background: rgba(0, 229, 255, 0.08);
+  }
+
+  /* ===== LOADER PROGRESIVO ===== */
+  #loader {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #04080a;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1.2rem;
+    transition: opacity 0.8s ease;
+    font-family: 'Special Elite', monospace;
+  }
+  #loader.done { opacity: 0; pointer-events: none; }
+  #loader-text {
+    color: var(--neon);
+    letter-spacing: 0.35em;
+    font-size: 0.95rem;
+    text-shadow: 0 0 14px var(--neon);
+    transition: opacity 0.15s ease;
+    min-height: 1.4em;
+    text-align: center;
+    max-width: 90vw;
+  }
+  .loader-bar {
+    width: 280px; height: 3px;
+    background: rgba(255,255,255,0.1);
+    overflow: hidden;
+    border-radius: 2px;
+  }
+  #bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--cyan), var(--neon));
+    box-shadow: 0 0 10px var(--neon);
+    transition: width 0.15s linear;
+  }
+  #loader-percent {
+    color: var(--wing);
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  #skip-loader {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--wing);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    padding: 0.45rem 1.1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+  }
+  #skip-loader:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+  }
+
+  /* ===== CANVAS 3D ===== */
+  #webgl-canvas {
+    position: fixed; inset: 0;
+    width: 100vw; height: 100vh;
+    z-index: 0; outline: none;
+  }
+
+  /* ===== SCROLL UI ===== */
+  #scroll-container {
+    position: absolute; inset: 0;
+    overflow-y: auto; overflow-x: hidden;
+    z-index: 10;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--neon) transparent;
+  }
+  #scroll-container::-webkit-scrollbar { width: 6px; }
+  #scroll-container::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
+
+  section {
+    width: 100%; min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 5rem 8vw 2rem 8vw;
+    pointer-events: none;
+  }
+  section .glass-panel { pointer-events: auto; }
+
+  .hero-section { justify-content: center; text-align: center; }
+  .align-left { justify-content: flex-start; }
+  .align-right { justify-content: flex-end; }
+
+  /* ===== GLASSMORPHISM ===== */
+  .glass-panel {
+    background: var(--card-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--border-subtle);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 2.4rem;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+    max-width: 540px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .glass-panel:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 32px 65px rgba(0, 0, 0, 0.85);
+  }
+  .main-title-panel {
+    max-width: 860px;
+    border-color: rgba(255, 0, 127, 0.25);
+  }
+
+  /* ===== TIPOGRAFÍA ===== */
+  h1, h2, h3 { text-transform: uppercase; letter-spacing: 2px; margin: 0 0 1rem 0; }
+  h1 {
+    font-size: clamp(2rem, 5.5vw, 3.8rem);
+    color: #fff;
+    text-shadow: 0 0 24px rgba(255, 0, 127, 0.55);
+    font-family: 'Special Elite', monospace;
+    line-height: 1.1;
+  }
+  h2 { font-size: 1.35rem; color: var(--trench); font-family: 'Space Grotesk', sans-serif; letter-spacing: 0.15em; }
+  h3 { font-size: 1.35rem; color: var(--bone); font-family: 'Special Elite', monospace; }
+  .tagline {
+    color: var(--fire);
+    font-style: italic;
+    font-size: 1.2rem;
+    margin-bottom: 1.8rem;
+    font-family: 'Special Elite', monospace;
+    letter-spacing: 0.05em;
+  }
+  .synopsis, .description { line-height: 1.75; font-size: 0.98rem; color: #D1D9E0; }
+
+  .format-badge {
+    display: inline-block;
+    padding: 0.32rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .action-button {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.85rem 1.6rem;
+    background: transparent;
+    border: 1px solid;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1.5rem;
+  }
+  .action-button:hover {
+    background: currentColor;
+    color: #050505 !important;
+    box-shadow: 0 0 20px currentColor;
+    transform: translateY(-2px);
+  }
+
+  .scroll-indicator {
+    margin-top: 2.8rem;
+    opacity: 0.75;
+    animation: pulse 2s infinite;
+    font-size: 0.85rem;
+    letter-spacing: 0.25em;
+    color: var(--cyan);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: translateY(0); opacity: 0.6; }
+    50% { transform: translateY(8px); opacity: 1; }
+  }
+
+  /* ===== MODAL GENERAL ===== */
+  #modal {
+    position: fixed; inset: 0;
+    z-index: 500;
+    background: rgba(3, 6, 8, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 2rem;
+  }
+  #modal.open { display: flex; animation: fadeInModal 0.3s ease forwards; }
+  @keyframes fadeInModal {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  #modal-inner {
+    background: rgba(12, 17, 23, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 16px;
+    padding: 2.8rem;
+    max-width: 980px; width: 100%;
+    max-height: 88vh; overflow-y: auto;
+    position: relative;
+    box-shadow: 0 35px 90px rgba(0, 0, 0, 0.95);
+    scrollbar-width: thin;
+    scrollbar-color: var(--cyan) transparent;
+  }
+  #modal-inner::-webkit-scrollbar { width: 6px; }
+  #modal-inner::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 3px; }
+
+  #close-modal {
+    position: absolute; top: 1.2rem; right: 1.2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--wing);
+    color: var(--bone);
+    width: 40px; height: 40px;
+    cursor: pointer; font-size: 1.4rem;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s;
+    z-index: 10;
+  }
+  #close-modal:hover { border-color: var(--neon); color: var(--neon); background: rgba(255, 0, 127, 0.1); }
+
+  /* ===== ESTILOS PARA EL MÓDULO DE GÉNESIS ===== */
+  .genesis-header {
+    border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+    padding-bottom: 1.4rem;
+    margin-bottom: 2rem;
+  }
+  .genesis-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    color: #fff;
+    margin: 0.4rem 0;
+    letter-spacing: 2px;
+  }
+  .genesis-quote-box {
+    background: rgba(0, 229, 255, 0.06);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    border-left: 4px solid var(--cyan);
+    border-radius: 6px;
+    padding: 1.4rem 1.6rem;
+    margin: 1.5rem 0;
+    line-height: 1.8;
+    color: #E0F2FE;
+    font-size: 1.02rem;
+  }
+  .genesis-quote-box p { margin: 0 0 1rem 0; }
+  .genesis-quote-box p:last-child { margin: 0; }
+
+  .genesis-comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  .comp-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1.4rem;
+  }
+  .comp-card h4 {
+    margin: 0 0 0.8rem 0;
+    font-family: 'Special Elite', monospace;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+  }
+  .comp-card p {
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: #CBD5E1;
+    margin: 0;
+  }
+
+  .genesis-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+    margin: 2rem 0;
+  }
+  .genesis-gallery-item {
+    position: relative;
+    background: #000;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: zoom-in;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .genesis-gallery-item:hover {
+    transform: translateY(-3px);
+    border-color: var(--cyan);
+    box-shadow: 0 10px 25px rgba(0, 229, 255, 0.2);
+  }
+  .genesis-gallery-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .genesis-gallery-item:hover .genesis-gallery-img {
+    transform: scale(1.04);
+  }
+  .genesis-gallery-caption {
+    padding: 0.8rem 1rem;
+    background: rgba(10, 15, 20, 0.92);
+    font-size: 0.8rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .genesis-gallery-caption strong {
+    display: block;
+    color: var(--cyan);
+    font-family: 'Space Grotesk', sans-serif;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ===== ESTILOS PARA EL LECTOR DE LA HISTORIA ===== */
+  .reader-header {
+    border-bottom: 1px solid rgba(164, 127, 98, 0.3);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .reader-meta {
+    display: flex; flex-wrap: wrap; gap: 0.8rem;
+    margin-bottom: 1rem;
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em;
+  }
+  .reader-meta-item {
+    padding: 0.25rem 0.6rem;
+    background: rgba(164, 127, 98, 0.15);
+    border: 1px solid rgba(164, 127, 98, 0.4);
+    border-radius: 3px;
+    color: var(--trench);
+  }
+  .reader-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    color: #fff;
+    margin: 0.4rem 0;
+    letter-spacing: 2px;
+  }
+  .reader-subtitle {
+    font-family: 'Special Elite', monospace;
+    color: var(--fire);
+    font-size: 1.05rem;
+    margin: 0 0 1rem 0;
+  }
+  .chapter-nav {
+    display: flex; flex-wrap: wrap; gap: 0.45rem;
+    margin: 1.5rem 0 2rem 0;
+    padding: 0.8rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+  }
+  .chapter-nav-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--offwhite);
+    padding: 0.4rem 0.7rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .chapter-nav-btn:hover, .chapter-nav-btn.active {
+    background: var(--trench);
+    border-color: var(--trench);
+    color: #050505;
+    font-weight: bold;
+  }
+  .reader-body {
+    line-height: 1.95;
+    font-size: 1.05rem;
+    color: #E2E8F0;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .reader-chapter {
+    margin-bottom: 3.5rem;
+    padding-top: 1rem;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  }
+  .chapter-heading {
+    font-family: 'Cinzel', serif;
+    font-size: 1.45rem;
+    color: var(--trench);
+    letter-spacing: 2px;
+    margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: 0.8rem;
+  }
+  .chapter-heading::after {
+    content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--trench), transparent);
+  }
+  .quote-callout {
+    background: rgba(230, 126, 34, 0.08);
+    border-left: 3px solid var(--fire);
+    padding: 1.2rem 1.6rem;
+    margin: 1.8rem 0;
+    font-style: italic;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.95rem;
+    color: #F8D7DA;
+  }
+  .commandment-box {
+    background: rgba(255, 0, 127, 0.08);
+    border: 1px solid rgba(255, 0, 127, 0.3);
+    border-radius: 8px;
+    padding: 1.2rem 1.6rem;
+    margin: 1.8rem 0;
+    font-family: 'Special Elite', monospace;
+  }
+  .commandment-title {
+    color: var(--neon);
+    font-weight: bold;
+    letter-spacing: 0.15em;
+    font-size: 0.85rem;
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+  }
+  .commandment-item {
+    color: #fff;
+    margin: 0.4rem 0;
+    font-size: 1rem;
+  }
+  .reader-actions {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .btn-reader-action {
+    background: transparent;
+    border: 1px solid var(--trench);
+    color: var(--trench);
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+  }
+  .btn-reader-action:hover {
+    background: var(--trench);
+    color: #050505;
+  }
+
+  /* ===== ESTILOS PARA EL MÓDULO DEL CÓMIC ===== */
+  .comic-modal-container {
+    display: flex; flex-direction: column; gap: 2rem;
+  }
+  .comic-header {
+    border-bottom: 1px solid rgba(122, 87, 63, 0.4);
+    padding-bottom: 1.2rem;
+  }
+  .comic-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+  .comic-frame {
+    position: relative;
+    background: #000;
+    border: 2px solid var(--armor);
+    border-radius: 8px;
+    padding: 0.8rem;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(122, 87, 63, 0.25);
+    overflow: hidden;
+  }
+  .comic-img-wrapper {
+    position: relative;
+    width: 100%;
+    cursor: zoom-in;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+  .comic-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.4s ease;
+    border-radius: 4px;
+  }
+  .comic-img-wrapper:hover .comic-img {
+    transform: scale(1.03);
+  }
+  .comic-tag-overlay {
+    position: absolute; bottom: 12px; left: 12px;
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid var(--fire);
+    color: var(--fire);
+    font-family: 'Special Elite', monospace;
+    font-size: 0.72rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 3px;
+    letter-spacing: 0.1em;
+  }
+  .comic-details {
+    display: flex; flex-direction: column; gap: 1.2rem;
+  }
+  .comic-panel-title {
+    font-family: 'Special Elite', monospace;
+    color: #fff;
+    font-size: 1.8rem;
+    margin: 0;
+    text-shadow: 0 0 15px rgba(230, 126, 34, 0.4);
+  }
+  .comic-quote {
+    font-family: 'Special Elite', monospace;
+    font-size: 1.25rem;
+    color: var(--fire);
+    border-left: 3px solid var(--fire);
+    padding-left: 1rem;
+    margin: 0.5rem 0;
+    letter-spacing: 0.05em;
+  }
+  .comic-specs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+    margin: 0.5rem 0;
+  }
+  .spec-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+  }
+  .spec-label {
+    font-size: 0.7rem; text-transform: uppercase; color: var(--wing); letter-spacing: 0.15em;
+  }
+  .spec-value {
+    font-size: 0.95rem; font-weight: 600; color: var(--offwhite); margin-top: 0.3rem;
+  }
+  .comic-description-text {
+    line-height: 1.7; font-size: 0.95rem; color: #CBD5E1;
+  }
+  .comic-script-box {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(122, 87, 63, 0.3);
+    border-radius: 6px;
+    padding: 1.2rem;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .script-step {
+    margin-bottom: 0.8rem; font-size: 0.88rem; line-height: 1.5;
+  }
+  .script-step strong { color: var(--trench); }
+
+  /* ===== VISOR PDF INTERACTIVO INTEGRADO (RELATO & CÓMIC) ===== */
+  .view-mode-tabs {
+    display: flex; gap: 0.6rem; flex-wrap: wrap;
+    margin: 1.2rem 0 1.5rem 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .view-mode-tab {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: var(--offwhite);
+    padding: 0.55rem 1.1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.25s ease;
+    display: inline-flex; align-items: center; gap: 0.45rem;
+  }
+  .view-mode-tab:hover {
+    border-color: var(--fire);
+    color: #fff;
+  }
+  .view-mode-tab.active {
+    background: var(--fire);
+    border-color: var(--fire);
+    color: #050505;
+    box-shadow: 0 0 16px rgba(230, 126, 34, 0.45);
+  }
+
+  .pdf-viewer-shell {
+    background: rgba(6, 10, 14, 0.96);
+    border: 1px solid rgba(230, 126, 34, 0.35);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.9);
+    margin-bottom: 1.8rem;
+  }
+  .pdf-toolbar {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 0.75rem;
+    padding: 0.85rem 1.2rem;
+    background: linear-gradient(90deg, rgba(20, 26, 34, 0.98), rgba(12, 17, 23, 0.98));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .pdf-toolbar-group {
+    display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
+  }
+  .pdf-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--bone);
+    padding: 0.4rem 0.75rem;
+    border-radius: 5px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.35rem;
+  }
+  .pdf-btn:hover:not(:disabled) {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: rgba(0, 229, 255, 0.1);
+  }
+  .pdf-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .pdf-btn.active-mode {
+    border-color: var(--fire);
+    color: var(--fire);
+    background: rgba(230, 126, 34, 0.14);
+  }
+  .pdf-page-indicator {
+    font-family: 'Special Elite', monospace;
+    font-size: 0.82rem;
+    color: var(--fire);
+    padding: 0 0.5rem;
+    letter-spacing: 0.08em;
+  }
+  .pdf-zoom-label {
+    font-size: 0.75rem;
+    color: var(--wing);
+    min-width: 46px;
+    text-align: center;
+  }
+  .pdf-canvas-viewport {
+    position: relative;
+    width: 100%;
+    min-height: 520px;
+    max-height: 72vh;
+    overflow: auto;
+    background: radial-gradient(circle at center, #111921 0%, #05080b 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 1rem;
+    gap: 1.4rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--fire) transparent;
+  }
+  .pdf-canvas-viewport canvas {
+    max-width: 100%;
+    height: auto !important;
+    border-radius: 4px;
+    box-shadow: 0 12px 38px rgba(0, 0, 0, 0.95), 0 0 1px rgba(255, 255, 255, 0.25);
+    background: #fff;
+  }
+  .pdf-loading-state {
+    color: var(--cyan);
+    font-family: 'Special Elite', monospace;
+    letter-spacing: 0.15em;
+    font-size: 0.9rem;
+    padding: 3rem 1rem;
+    text-align: center;
+  }
+  .pdf-native-frame {
+    width: 100%;
+    height: 70vh;
+    border: none;
+    background: #0b0f14;
+    display: block;
+  }
+  .pdf-page-pills {
+    display: flex; flex-wrap: wrap; gap: 0.35rem;
+    padding: 0.65rem 1.2rem;
+    background: rgba(8, 12, 16, 0.95);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    align-items: center;
+  }
+  .pdf-page-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--offwhite);
+    width: 30px; height: 28px;
+    border-radius: 4px;
+    font-size: 0.74rem;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    transition: all 0.2s;
+  }
+  .pdf-page-pill:hover, .pdf-page-pill.active {
+    background: var(--fire);
+    border-color: var(--fire);
+    color: #050505;
+    font-weight: 700;
+  }
+
+  /* ===== ESTILOS PARA EL MÓDULO DE PODCAST ===== */
+  .podcast-modal-container {
+    display: flex; flex-direction: column; gap: 2rem;
+  }
+  .podcast-header {
+    border-bottom: 1px solid rgba(77, 94, 77, 0.5);
+    padding-bottom: 1.2rem;
+  }
+  .podcast-player-box {
+    background: linear-gradient(145deg, rgba(16, 28, 22, 0.92) 0%, rgba(8, 14, 12, 0.98) 100%);
+    border: 1px solid rgba(77, 94, 77, 0.7);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 30px rgba(16, 185, 129, 0.06);
+    border-radius: 12px;
+    padding: 1.8rem;
+  }
+  .podcast-hud-display {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem; margin-bottom: 1.5rem;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.85rem;
+  }
+  .podcast-freq-badge {
+    color: var(--emerald);
+    display: flex; align-items: center; gap: 0.5rem;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  }
+  .freq-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--emerald);
+    box-shadow: 0 0 8px var(--emerald); animation: blink 1.2s infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+  .podcast-eq-container {
+    display: flex; align-items: flex-end; gap: 4px;
+    height: 38px; margin: 1.2rem 0;
+  }
+  .eq-bar {
+    flex: 1; background: rgba(77, 94, 77, 0.5);
+    border-radius: 2px; height: 6px;
+    transition: height 0.15s ease, background-color 0.2s ease;
+  }
+  .podcast-eq-container.is-playing .eq-bar {
+    background: linear-gradient(180deg, var(--emerald), var(--olive));
+    animation: eqJiggle 0.6s infinite ease-in-out alternate;
+  }
+  @keyframes eqJiggle {
+    0% { height: 12%; }
+    50% { height: 85%; }
+    100% { height: 35%; }
+  }
+
+  .podcast-controls {
+    display: flex; align-items: center; gap: 1.2rem;
+    margin-top: 1rem;
+  }
+  .podcast-play-btn {
+    background: var(--emerald);
+    border: none;
+    color: #04080a;
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 1.4rem;
+    font-weight: bold;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+  }
+  .podcast-play-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.7);
+  }
+  .podcast-timeline {
+    flex: 1;
+    display: flex; flex-direction: column; gap: 0.4rem;
+  }
+  .timeline-bar-wrapper {
+    width: 100%; height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .timeline-progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--olive), var(--emerald));
+    box-shadow: 0 0 10px var(--emerald);
+    border-radius: 4px;
+    transition: width 0.1s linear;
+  }
+  .timeline-timestamps {
+    display: flex; justify-content: space-between;
+    font-size: 0.78rem; color: var(--wing);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .transcript-box {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 1.5rem;
+    max-height: 280px; overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--emerald) transparent;
+  }
+  .dialogue-entry {
+    margin-bottom: 1.1rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .dialogue-entry:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .dialogue-time {
+    font-family: 'Special Elite', monospace;
+    font-size: 0.75rem;
+    color: var(--wing);
+    margin-right: 0.5rem;
+  }
+  .dialogue-speaker-efimero {
+    color: #34D399; font-weight: bold; font-family: 'Space Grotesk', sans-serif;
+  }
+  .dialogue-speaker-efe {
+    color: var(--fire); font-weight: bold; font-family: 'Space Grotesk', sans-serif;
+  }
+
+  /* ===== CONTROL DE CALIDAD GRÁFICA (NUEVO) ===== */
+  #gfx-toggle {
+    position: fixed; bottom: 1.2rem; right: 1.2rem;
+    z-index: 120;
+    background: rgba(4, 8, 10, 0.8);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    color: var(--cyan);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.25s ease;
+  }
+  #gfx-toggle:hover {
+    border-color: var(--neon);
+    color: var(--neon);
+    box-shadow: 0 0 14px rgba(255, 0, 127, 0.4);
+  }
+
+  @media (max-width: 900px) {
+    .comic-layout, .genesis-comparison-grid, .genesis-gallery-grid { grid-template-columns: 1fr; }
+    #transmedia-hud { padding: 0.8rem 1.2rem; }
+    .hud-brand { font-size: 0.85rem; }
+    .hud-btn { padding: 0.35rem 0.55rem; font-size: 0.65rem; }
+    #modal-inner { padding: 2rem 1.4rem; }
+  }
+
+  @media (max-width: 768px) {
+    section { padding: 5rem 6vw 2rem 6vw; }
+    .align-left, .align-right { justify-content: center; }
+    .glass-panel { padding: 1.8rem; }
+    #gfx-toggle { bottom: 0.8rem; right: 0.8rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  :focus-visible { outline: 2px solid var(--neon); outline-offset: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ===== HUD DE NAVEGACIÓN TRANSMEDIA ===== -->
+<header id="transmedia-hud">
+  <div class="hud-brand">
+    <span>🦋</span> CRÓNICAS DEL HUMEDAL <strong>/ HEMERA</strong>
+  </div>
+  <nav class="hud-nav" aria-label="Navegación por productos transmedia">
+    <button class="hud-btn" data-target="hero">Inicio</button>
+    <button class="hud-btn" data-target="sec-origen" style="border-color:#00E5FF; color:#00E5FF;">0. Génesis</button>
+    <button class="hud-btn" data-target="sec-historia" style="border-color:#A47F62">I. Relato</button>
+    <button class="hud-btn" data-target="sec-comic" style="border-color:#7A573F">II. Cómic</button>
+    <button class="hud-btn" data-target="sec-podcast" style="border-color:#10B981; color:#10B981;">III. Podcast</button>
+    <button class="hud-btn" data-target="sec-ar" style="border-color:#8A959D">IV. RA</button>
+    <button class="hud-btn" data-target="sec-juego" style="border-color:#E67E22">V. Juego</button>
+    <button class="hud-btn" data-target="sec-cierre" style="border-color:#FF007F; color:#FF007F;">✦ Cierre</button>
+  </nav>
+</header>
+
+<!-- ===== LOADER PROGRESIVO ===== -->
+<div id="loader" role="status" aria-live="polite">
+  <div id="loader-text">DESCENDIENDO A HEMERA</div>
+  <div class="loader-bar"><div id="bar-fill"></div></div>
+  <div id="loader-percent">0%</div>
+  <button id="skip-loader" aria-label="Omitir animación de introducción">Entrar directo ➔</button>
+</div>
+
+<!-- ===== CANVAS 3D ===== -->
+<canvas id="webgl-canvas" aria-label="Entorno 3D de Hemera"></canvas>
+
+<!-- ===== CONTROL DE CALIDAD GRÁFICA ===== -->
+<button id="gfx-toggle" title="Alternar efectos de post-procesado (Bloom + grano fílmico)">✦ FX: ALTO</button>
+
+<!-- ===== SCROLL UI ===== -->
+<div id="scroll-container">
+
+  <!-- SECCIÓN HERO -->
+  <section id="hero" class="hero-section">
+    <div class="glass-panel main-title-panel">
+      <h1>Crónicas del Humedal</h1>
+      <h2>Libro I: El Despertar de la Ninfa</h2>
+      <p class="tagline">"No viviré para morir"</p>
+      <p class="synopsis">
+        Bajo el fango denso del humedal de Bogotá florece <strong>Hemera</strong>: una utopía biotecnológica
+        subterránea donde nadie envejece ni pasa hambre, pero todos son sacrificados a las 24 horas
+        de alcanzar la adultez. <strong>EFE</strong>, una ninfa disidente encadenada al lodo, descubrirá que la muerte no es biológica:
+        es un exterminio inducido por el tiránico Consejo de Libélulas.
+      </p>
+      <div class="scroll-indicator">↓ DESCIENDE AL HUMEDAL ↓</div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 0: GÉNESIS & IDEA PRINCIPAL -->
+  <section id="sec-origen" class="align-right">
+    <div class="glass-panel" style="border-color:#00E5FF">
+      <span class="format-badge" style="background:#00E5FF; color:#000;">Génesis Conceptual · Biología & Distopía</span>
+      <h3 style="color:#00E5FF;">El Efemeróptero Disidente</h3>
+      <p class="description">
+        El fundamento biológico que inspiró el universo: los efemerópteros pasan casi toda su existencia como ninfas en el agua, pero al convertirse en adultos su vida se reduce a 24 horas para cortejar y morir.
+      </p>
+      <p class="description" style="font-size:0.88rem; color:#94A3B8; margin-top:0.6rem;">
+        EFE escoge no seguir las dinámicas de su sociedad y rechaza su metamorfosis, pues la plenitud de su especie significa su propia ejecución.
+      </p>
+      <button class="action-button open-modal" data-product="origen" style="color:#00E5FF; border-color:#00E5FF;">
+        <span>🧬</span> Explorar Génesis y Anatomía
+      </button>
+    </div>
+  </section>
+
+  <!-- MÓDULO 1: HISTORIA -->
+  <section id="sec-historia" class="align-left">
+    <div class="glass-panel" style="border-color:#A47F62">
+      <span class="format-badge" style="background:#A47F62">Relato Distópico · 8 Capítulos · PDF</span>
+      <h3>El Despertar de la Ninfa</h3>
+      <p class="description">El texto canónico fundacional: la deformidad de EFE, la caída al cañaveral abisal, el zarpazo del Sirirí biomecánico, el encuentro con el viejo Efímero y la revelación del biochip endócrino.</p>
+      <button class="action-button open-modal" data-product="historia" style="color:#A47F62;border-color:#A47F62">
+        <span>📖</span> Visualizar Relato (PDF & Web)
+      </button>
+    </div>
+  </section>
+
+  <!-- MÓDULO 2: CÓMIC -->
+  <section id="sec-comic" class="align-right">
+    <div class="glass-panel" style="border-color:#7A573F">
+      <span class="format-badge" style="background:#7A573F;color:#fff">Novela Gráfica · EFE.pdf (12 Págs.)</span>
+      <h3>Rorschach Nocturno</h3>
+      <p class="description">Adaptación visual completa en formato cómic (EFE.pdf). Tinta negra y texturas sepia inspiradas en cómic underground sobre la rebelión de EFE bajo el pantano de Bogotá.</p>
+      <button class="action-button open-modal" data-product="comic" style="color:#E67E22;border-color:#7A573F">
+        <span>📚</span> Visualizar Cómic Completo (PDF)
+      </button>
+    </div>
+  </section>
+
+  <!-- MÓDULO 3: PODCAST -->
+  <section id="sec-podcast" class="align-left">
+    <div class="glass-panel" style="border-color:#10B981">
+      <span class="format-badge" style="background:#10B981;color:#04080a;">Audioficción Diegética · Ep. 1</span>
+      <h3 style="color:#34D399;">Frecuencias del Pantano</h3>
+      <p class="description">
+        Transmisión interceptada de la reunión secreta entre el fundador mutilado <strong>Efímero</strong> y la ninfa disidente <strong>EFE</strong> en las ruinas sumergidas. Descubre el diálogo original donde se desvela el engaño del biochip de 24 horas y la entrega del transmisor electromagnético.
+      </p>
+      <button class="action-button open-modal" data-product="podcast" style="color:#10B981;border-color:#10B981">
+        <span>🎙️</span> Sintonizar Transmisión (1:39)
+      </button>
+    </div>
+  </section>
+
+  <!-- MÓDULO 4: REALIDAD AUMENTADA -->
+  <section id="sec-ar" class="align-right">
+    <div class="glass-panel" style="border-color:#8A959D; max-width:580px;">
+      <span class="format-badge" style="background:#8A959D;color:#000">Realidad Aumentada · Funciona con AR</span>
+      <h3>Carta de Personaje: EFEMERO</h3>
+      <div style="display:flex; gap:1.1rem; align-items:flex-start; flex-wrap:wrap; margin-top:0.5rem;">
+        <img src="assets/carta_efemero_ar.jpg" alt="Carta de personaje EFEMERO para escanear con Realidad Aumentada" onclick="openProductModal('ar')" title="Haz clic para ampliar la carta escaneable" style="width:145px; flex-shrink:0; border-radius:8px; border:1px solid rgba(0,229,255,0.45); box-shadow:0 8px 24px rgba(0,0,0,0.75); cursor:zoom-in;">
+        <div style="flex:1; min-width:220px;">
+          <p class="description" style="margin:0;">Carta de personaje oficial interactiva del universo Hemera (<strong>Funciona con AR</strong>). Apunta la cámara al marcador de <strong>EFEMERO</strong> para activar la proyección en Realidad Aumentada.</p>
+          <p style="margin:0.85rem 0 0 0; padding:0.7rem 0.9rem; background:rgba(0,229,255,0.08); border-left:3px solid #00E5FF; border-radius:4px; font-size:0.83rem; line-height:1.5; color:#BAE6FD;">
+            <strong>ℹ️ Aviso (AR):</strong> Debes <strong>escanear la ficha / carta de personaje que aparece en pantalla</strong> (la cual estaría impresa en la experiencia física). El enlace se abrirá en una ventana nueva y podrás regresar cuando lo desees.
+          </p>
+        </div>
+      </div>
+      <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1.1rem;">
+        <a href="https://edwardalexandertf.github.io/efemer/" target="_blank" rel="noopener noreferrer" class="action-button" style="color:#00E5FF;border-color:#00E5FF;margin-top:0;">
+          <span>📱</span> Abrir Experiencia AR ↗
+        </a>
+        <button class="action-button open-modal" data-product="ar" style="color:#8A959D;border-color:#8A959D;margin-top:0;">
+          <span>🃏</span> Ampliar Ficha / Imprimir
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MÓDULO 5: VIDEOJUEGO -->
+  <section id="sec-juego" class="align-left">
+    <div class="glass-panel" style="border-color:#E67E22">
+      <span class="format-badge" style="background:#E67E22">Videojuego 2.5D · Raycaster Biopunk</span>
+      <h3>Aether's Stain: El Ciclo Manchado</h3>
+      <p class="description">Encarna a <strong>EFE ("El Manchado")</strong> en las entrañas del humedal industrial. Usa tu látigo mecano-espinoso, evade a las Ninfas de Libélula y recolecta los biochips plateados en 4 sectores más el Epílogo del Gran Sol.</p>
+      <p style="margin:0.9rem 0 0 0; padding:0.7rem 0.9rem; background:rgba(230,126,34,0.1); border-left:3px solid #E67E22; border-radius:4px; font-size:0.84rem; line-height:1.5; color:#F5CBA7;">
+        <strong>ℹ️ Aviso:</strong> El videojuego se abrirá en una ventana nueva. Esta web permanecerá abierta para que puedas regresar cuando lo desees.
+      </p>
+      <a href="https://maagomezc85.github.io/aethers-stain/" target="_blank" rel="noopener noreferrer" class="action-button" style="color:#E67E22;border-color:#E67E22">
+        <span>🎮</span> Jugar Aether's Stain ↗
+      </a>
+    </div>
+  </section>
+
+  <!-- ESCENA FINAL: CIERRE / EPÍLOGO -->
+  <section id="sec-cierre" class="hero-section">
+    <div class="glass-panel main-title-panel" style="border-color:rgba(0, 229, 255, 0.45); max-width:820px;">
+      <span class="format-badge" style="background:linear-gradient(90deg, #00E5FF, #FF007F); color:#04080a;">Epílogo Transmedia · El Ciclo Roto</span>
+      <h2 style="color:var(--cyan); margin-bottom:0.4rem;">Más Allá de las Veinticuatro Horas</h2>
+      <h1 style="font-size:clamp(1.8rem, 4.5vw, 3.1rem); margin-bottom:0.8rem;">El Legado de Efímero</h1>
+      <p class="tagline" style="margin-bottom:1.2rem;">"No viviré para morir"</p>
+      <p class="synopsis" style="margin-bottom:1.2rem;">
+        Has recorrido los estratos sumergidos de <strong>Hemera</strong>: desde la <strong>Génesis</strong> biológica del orden <em>Ephemeroptera</em>, el <strong>Relato</strong> fundacional, los trazos en sepia del <strong>Cómic</strong> y las <strong>Frecuencias del Pantano</strong>, hasta la <strong>Realidad Aumentada</strong> y la rebelión final en el videojuego <strong>Aether's Stain</strong>.
+      </p>
+      <p class="synopsis" style="font-size:0.92rem; color:#94A3B8; margin-bottom:1.6rem;">
+        En la cumbre de la Torre Zenith, bajo el holograma del viejo Efímero, la disidencia de <strong>EFE</strong> permanece como símbolo de resistencia frente al control biopolítico: elegir la conciencia por encima de una plenitud efímera programada.
+      </p>
+      <div style="display:flex; justify-content:center; gap:0.9rem; flex-wrap:wrap; margin-top:1.4rem;">
+        <button type="button" id="btn-return-hemera" class="action-button" style="color:#00E5FF; border-color:#00E5FF; margin-top:0; font-size:0.9rem; padding:0.95rem 1.9rem;">
+          <span>🦋</span> Regresar a Hemera ↑
+        </button>
+        <button type="button" class="action-button" onclick="document.getElementById('sec-origen').scrollIntoView({behavior:'smooth'})" style="color:#FF007F; border-color:#FF007F; margin-top:0;">
+          <span>🧬</span> Volver a la Génesis
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div style="height:22vh"></div>
+</div>
+
+<!-- ===== MODAL DINÁMICO ===== -->
+<div id="modal" role="dialog" aria-modal="true">
+  <div id="modal-inner">
+    <button id="close-modal" aria-label="Cerrar modal">×</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- ===== LIBRERÍAS EXTERNAS ===== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- POST-PROCESSING (Bloom + Film Grain) para Three.js r128.
+     Cargados con `defer`: NO bloquean el parseo del HTML y se usan bajo demanda
+     (el composer solo se construye cuando el usuario activa el botón ✦ FX). -->
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FilmShader.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/FilmPass.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="assets/pdf.min.js"></script>
+<script>
+  if (!window.pdfjsLib) {
+    document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>');
+  }
+</script>
+<script src="assets/relato_data.js"></script>
+<script src="assets/comic_data.js"></script>
+
+<script>
+/* ==========================================================
+   0. LOADER PROGRESIVO
+   ========================================================== */
+const LOADER_DURATION = 3500;
+
+const loaderPhrases = [
+  'DESCENDIENDO A HEMERA',
+  'ESTUDIANDO EL ORDEN EPHEMEROPTERA',
+  'LOCALIZANDO EL BIOCHIP ENDÓCRINO',
+  'INTERCEPTANDO FRECUENCIAS DEL PANTANO',
+  'CALIBRANDO BIOLUMINISCENCIA',
+  'RECUPERANDO MEMORIA DE EFE',
+  'SINCRONIZANDO CON LA TORRE ZENITH',
+  'EVADIENDO AL SIRIRÍ BIOMECÁNICO',
+  'EL DESPERTAR DE LA NINFA'
+];
+
+const loaderEl      = document.getElementById('loader');
+const loaderTextEl  = document.getElementById('loader-text');
+const loaderBarFill = document.getElementById('bar-fill');
+const loaderPercent = document.getElementById('loader-percent');
+const skipLoaderBtn = document.getElementById('skip-loader');
+
+let loaderStart    = Date.now();
+let loaderFinished = false;
+
+function updateLoader() {
+  if (loaderFinished) return;
+  const elapsed  = Date.now() - loaderStart;
+  const progress = Math.min(100, (elapsed / LOADER_DURATION) * 100);
+
+  if (loaderBarFill) loaderBarFill.style.width = progress + '%';
+  if (loaderPercent) loaderPercent.textContent = Math.floor(progress) + '%';
+
+  if (loaderTextEl) {
+    const idx = Math.min(
+      loaderPhrases.length - 1,
+      Math.floor((progress / 100) * loaderPhrases.length)
+    );
+    if (loaderTextEl.textContent !== loaderPhrases[idx]) {
+      loaderTextEl.style.opacity = 0;
+      setTimeout(() => {
+        if (loaderTextEl) {
+          loaderTextEl.textContent = loaderPhrases[idx];
+          loaderTextEl.style.opacity = 1;
+        }
+      }, 120);
+    }
+  }
+
+  if (progress < 100) {
+    requestAnimationFrame(updateLoader);
+  } else {
+    finishLoader();
+  }
+}
+
+function finishLoader() {
+  if (loaderFinished) return;
+  loaderFinished = true;
+  if (loaderEl) loaderEl.classList.add('done');
+  setTimeout(() => { if (loaderEl) loaderEl.remove(); }, 850);
+}
+
+if (skipLoaderBtn) {
+  skipLoaderBtn.addEventListener('click', finishLoader);
+}
+requestAnimationFrame(updateLoader);
+setTimeout(finishLoader, LOADER_DURATION + 1500);
+
+/* ==========================================================
+   1. CONTENIDO TRANSMEDIA
+   ========================================================== */
+let currentPodcastAudio = null;
+let isPodcastAudioPlaying = false;
+
+const PRODUCTS = {
+  // MÓDULO 0: GÉNESIS
+  origen: {
+    title: 'GÉNESIS CONCEPTUAL: EL EFEMERÓPTERO DISIDENTE',
+    color: '#00E5FF',
+    html: `
+      <div class="genesis-header">
+        <div class="reader-meta">
+          <span class="reader-meta-item" style="color:#00E5FF; border-color:#00E5FF;">Idea Principal</span>
+          <span class="reader-meta-item">Entomología Aplicada</span>
+          <span class="reader-meta-item">Distopía Biopunk</span>
+          <span class="reader-meta-item">Biblia Transmedia</span>
+        </div>
+        <h2 class="genesis-title">EL ORIGEN BIOLÓGICO Y FILOSÓFICO</h2>
+        <div class="reader-subtitle" style="color:var(--cyan);">De la Metamorfosis Incompleta a la Rebelión de EFE</div>
+      </div>
+
+      <div class="genesis-quote-box">
+        <p>
+          <strong>Los efemerópteros</strong>, son insectos hemimetábolos, es decir, su metamorfosis es incompleta, presentan huevo, ninfa, subimago y adulto. Su vida entera la pasan en el estadio de ninfa, habitan en agua, suelen ser omnívoros. Cuando siguen su ciclo de vida, se convierten en adultos y su vida de adultos se limita al cortejo y la cópula; las hembras suelen vivir tiempos más cortos que los machos, incluso algunas especies alrededor de 5 minutos, mientras los machos pueden alcanzar tiempos más prolongados de hasta 24 horas.
+        </p>
+        <p>
+          En un universo de esta característica, <strong>EFE</strong>, el personaje de la historia, crece enfrentándose a diversos temas que lo obligan a no seguir el curso regular de la naturaleza. Temas como la natalidad, el envejecimiento, la función de nicho…
+        </p>
+        <p>
+          <strong>EFE, el efemeróptero disidente</strong> escoge no seguir las dinámicas de su sociedad, y evita a toda costa terminar su transformación de ninfa a adulto para culminar su fin reproductivo, pues esta decisión lo llevará a la muerte.
+        </p>
+      </div>
+
+      <div style="margin:2rem 0; line-height:1.8; color:#CBD5E1;">
+        <h3 style="color:#fff; font-size:1.3rem; margin-bottom:0.8rem; letter-spacing:1px;">
+          SINOPSIS: LA CONDICIÓN EFÍMERA BAJO EL PANTANO DE BOGOTÁ
+        </h3>
+        <p>
+          Bajo el fango contaminado del humedal de Bogotá florece <em>Hemera</em>: una pesadilla biopolítica donde una sociedad completa ha sido diseñada a imagen de los efemerópteros. Sus habitantes disfrutan de una juventud acuática eterna, colmada de néctar sintético y salud perfecta, pero bajo una sentencia ineludible: al alcanzar la adultez (fase <em>imago</em>), deben emerger a la superficie para copular desenfrenadamente y perecer a las 24 horas.
+        </p>
+        <p>
+          El <strong>Consejo de Libélulas</strong> biomecánicas ha convertido este ciclo natural en un dogma sagrado: <em>"Tu vida justifica a Hemera, tu muerte preserva a Hemera"</em>. Sin embargo, la muerte no es biológica: un biochip endócrino implantado en las ninfas libera una neurotóxina que las liquida tras desovar, permitiendo a las Libélulas monopolizar una red clandestina de comercio de huevos y carne con las aves rapaces de la superficie (como el temible <strong>Sirirí biomecánico</strong>).
+        </p>
+        <p>
+          <strong>EFE</strong> nace con alas rotas y un rostro que muta en manchas siniestras de Rorschach. Marginado por su deformidad, comprende la farsa: su tara física es su mayor virtud. Al no poder ascender al sacrificio aéreo voluntario, EFE decide detener su metamorfosis, extirpar los biochips de sus hermanos rebeldes y declarar la guerra al orden establecido bajo el juramento inquebrantable: <em>«No viviré para morir»</em>.
+        </p>
+      </div>
+
+      <div class="genesis-comparison-grid">
+        <div class="comp-card" style="border-left: 3px solid var(--olive);">
+          <h4 style="color:#6ee7b7;">BIOLOGÍA NATURAL (Ephemeroptera)</h4>
+          <p>
+            • <strong>Ciclo hemimetábolo:</strong> Huevo, ninfa acuática, subimago alado y adulto.<br>
+            • <strong>Existencia:</strong> El 99% de su ciclo transcurre bajo el agua como ninfa.<br>
+            • <strong>Fase Adulta:</strong> Aparato digestivo atrofiado; no se alimentan.<br>
+            • <strong>Destino:</strong> Vuelo nupcial, fecundación y muerte en cuestión de minutos o hasta 24 horas por senescencia biológica.
+          </p>
+        </div>
+        <div class="comp-card" style="border-left: 3px solid var(--neon);">
+          <h4 style="color:var(--neon);">DISTOPÍA TRANSMEDIA (Hemera)</h4>
+          <p>
+            • <strong>Sociedad Programada:</strong> Las ninfas viven en el confort del santuario acuático.<br>
+            • <strong>El Dogma de Efímero:</strong> Morir a las 24 horas es venerado como el honor supremo.<br>
+            • <strong>La Mentira del Biochip:</strong> La muerte a las 24 horas es un envenenamiento neurotóxico artificial inducido por las Libélulas.<br>
+            • <strong>La Disidencia:</strong> EFE detiene su metamorfosis para no ser una pieza desechable de la granja biológica.
+          </p>
+        </div>
+      </div>
+
+      <h3 style="color:#fff; font-size:1.2rem; margin:2.5rem 0 1rem 0; letter-spacing:1px;">
+        ARCHIVOS VISUALES DE PRODUCCIÓN & CONCEPT ART
+      </h3>
+      <div class="genesis-gallery-grid">
+        <div class="genesis-gallery-item" onclick="window.open('assets/efemeroptero_biologico.jpg', '_blank')">
+          <img src="assets/efemeroptero_biologico.jpg" alt="Efemeróptero real en estado adulto" class="genesis-gallery-img">
+          <div class="genesis-gallery-caption">
+            <strong>1. Referente Entomológico</strong>
+            Morfología del efemeróptero adulto: alas transparentes y filamentos caudales.
+          </div>
+        </div>
+
+        <div class="genesis-gallery-item" onclick="window.open('assets/efe_humedal_distopia.jpg', '_blank')">
+          <img src="assets/efe_humedal_distopia.jpg" alt="EFE en el humedal distópico de Bogotá con letreros de Controles Estrictos" class="genesis-gallery-img">
+          <div class="genesis-gallery-caption">
+            <strong>2. El Humedal Distópico</strong>
+            EFE ante las aguas del humedal con los letreros de «Población Excedida - Controles Estrictos».
+          </div>
+        </div>
+
+        <div class="genesis-gallery-item" onclick="window.open('assets/efe_primer_plano.jpg', '_blank')">
+          <img src="assets/efe_primer_plano.jpg" alt="Primer plano de EFE con máscara de Rorschach y ojos compuestos" class="genesis-gallery-img">
+          <div class="genesis-gallery-caption">
+            <strong>3. Fisonomía de EFE</strong>
+            Cutícula facial mutante con el patrón de Rorschach y ojos compuestos biomecánicos.
+          </div>
+        </div>
+
+        <div class="genesis-gallery-item" onclick="window.open('assets/efe_reference_sheet.jpg', '_blank')">
+          <img src="assets/efe_reference_sheet.jpg" alt="Model Sheet Oficial: 4 vistas del personaje EFE" class="genesis-gallery-img">
+          <div class="genesis-gallery-caption">
+            <strong>4. Model Sheet Oficial (4 Vistas)</strong>
+            Desglose ortográfico: alas tullidas, espina dorsal de espinas entrelazadas y cutícula quitinosa.
+          </div>
+        </div>
+      </div>
+
+      <div class="reader-actions">
+        <button class="btn-reader-action" style="border-color:var(--cyan); color:var(--cyan);" onclick="document.querySelector('[data-product=historia]').click();">
+          <span>📖</span> Continuar al Libro I: El Despertar de la Ninfa ➔
+        </button>
+      </div>
+    `
+  },
+
+  // MÓDULO 1: LA HISTORIA
+  historia: {
+    title: 'NO VIVIRÉ PARA MORIR',
+    color: '#A47F62',
+    html: `
+      <div class="reader-header">
+        <div class="reader-meta">
+          <span class="reader-meta-item">Crónicas del Humedal</span>
+          <span class="reader-meta-item">Libro I</span>
+          <span class="reader-meta-item">Relato Distópico</span>
+          <span class="reader-meta-item">Documento PDF Oficial</span>
+        </div>
+        <h2 class="reader-title">NO VIVIRÉ PARA MORIR</h2>
+        <div class="reader-subtitle">El Despertar de la Ninfa — Relato Distópico de Ciencia Ficción</div>
+        <p style="color:#94A3B8; font-size:0.9rem; line-height:1.6; margin:0;">
+          Texto íntegro correspondiente al primer hito narrativo transmedia. Ambientado en las profundidades del Humedal de Bogotá, bajo las ruinas del mundo antiguo y la tiranía del Consejo de Libélulas.
+        </p>
+
+        <div class="view-mode-tabs">
+          <button type="button" class="view-mode-tab active" id="tab-pdf-historia" onclick="switchProductSubView('historia', 'pdf')">
+            <span>📄</span> Visor Documento PDF (relato.pdf)
+          </button>
+          <button type="button" class="view-mode-tab" id="tab-web-historia" onclick="switchProductSubView('historia', 'web')">
+            <span>📖</span> Lectura Interactiva por Capítulos
+          </button>
+          <a href="assets/relato.pdf" download="Relato_No_Vivire_Para_Morir.pdf" class="view-mode-tab" style="margin-left:auto; text-decoration:none; border-color:var(--trench); color:var(--trench);">
+            <span>📥</span> Descargar PDF
+          </a>
+        </div>
+      </div>
+
+      <!-- VISOR PDF INTEGRADO DEL RELATO -->
+      <div id="subview-pdf-historia">
+        <div class="pdf-viewer-shell" id="pdf-shell-historia" style="border-color:rgba(164, 127, 98, 0.5);">
+          <div class="pdf-toolbar">
+            <div class="pdf-toolbar-group">
+              <button type="button" class="pdf-btn" id="pdf-prev-historia" title="Página anterior (←)">◀ Anterior</button>
+              <span class="pdf-page-indicator" id="pdf-page-info-historia">PÁG. 1 / 5</span>
+              <button type="button" class="pdf-btn" id="pdf-next-historia" title="Página siguiente (→)">Siguiente ▶</button>
+            </div>
+            <div class="pdf-toolbar-group">
+              <button type="button" class="pdf-btn active-mode" id="pdf-mode-single-historia" title="Ver página por página">📄 1 Pág.</button>
+              <button type="button" class="pdf-btn" id="pdf-mode-scroll-historia" title="Ver todas las páginas en cascada">📜 Cascada</button>
+              <button type="button" class="pdf-btn" id="pdf-mode-native-historia" title="Usar visor PDF nativo del navegador">🌐 Visor Nativo</button>
+            </div>
+            <div class="pdf-toolbar-group">
+              <button type="button" class="pdf-btn" id="pdf-zoom-out-historia" title="Reducir zoom">−</button>
+              <span class="pdf-zoom-label" id="pdf-zoom-val-historia">100%</span>
+              <button type="button" class="pdf-btn" id="pdf-zoom-in-historia" title="Aumentar zoom">+</button>
+              <button type="button" class="pdf-btn" id="pdf-fullscreen-historia" title="Pantalla completa">⛶</button>
+            </div>
+          </div>
+          <div class="pdf-canvas-viewport" id="pdf-viewport-historia">
+            <div class="pdf-loading-state">CARGANDO ARCHIVO RELATO.PDF...</div>
+          </div>
+          <div class="pdf-page-pills" id="pdf-pills-historia"></div>
+        </div>
+      </div>
+
+      <!-- LECTURA WEB INTERACTIVA POR CAPÍTULOS -->
+      <div id="subview-web-historia" style="display:none;">
+        <div class="chapter-nav">
+          <span style="font-size:0.75rem; color:#A47F62; align-self:center; font-weight:bold; margin-right:0.4rem;">CAPÍTULOS:</span>
+          <button class="chapter-nav-btn" onclick="document.getElementById('cap-1').scrollIntoView({behavior:'smooth'})">I. La Anatomía</button>
+          <button class="chapter-nav-btn" onclick="document.getElementById('cap-2').scrollIntoView({behavior:'smooth'})">II. El Mito</button>
+          <button class="chapter-nav-btn" onclick="document.getElementById('cap-3').scrollIntoView({behavior:'smooth'})">III. El Sirirí</button>
+          <button class="chapter-nav-btn" onclick="document.getElementById('cap-4').scrollIntoView({behavior:'smooth'})">IV. Efímero</button>
+          <button class="chapter-nav-btn" onclick="document.getElementById('cap-5').scrollIntoView({behavior:'smooth'})">V. El Rebaño</button>
+          <button class="chapter-nav-btn" onclick="document.getElementById('cap-6').scrollIntoView({behavior:'smooth'})">VI. La Rebelión</button>
+          <button class="chapter-nav-btn" onclick="document.getElementById('cap-7').scrollIntoView({behavior:'smooth'})">VII. La Matanza</button>
+          <button class="chapter-nav-btn" onclick="document.getElementById('cap-8').scrollIntoView({behavior:'smooth'})">VIII. Epílogo</button>
+        </div>
+
+        <div class="reader-body">
+          <article id="cap-1" class="reader-chapter">
+            <div class="chapter-heading">I. La Anatomía del Abismo</div>
+            <p>Bajo las aguas densas de un humedal en Bogotá, yace <em>“Hemera”</em>. Para cualquier ser humano que observara desde la superficie, no existe más que un fango inmóvil, podrido por el detrito urbano. Pero abajo, sumergida en la oscuridad, resplandece una pesadilla perfecta: una atlántida con torres de cristal orgánico, filtros hidrodinámicos de flujo perpetuo y pasajes herméticos iluminados por bioluminiscencia sintética. “Hemera” es un santuario de abundancia inagotable, una jaula de opulencia donde el hambre, enfermedades o depredadores son posibilidades erradicadas sin ningún esfuerzo.</p>
+            <p>En las profundidades de este edén pantanoso habita <strong>EFE</strong>. Su cuerpo es una cruel burla genética esculpida por el rigor del ambiente. Posee un tórax humanoide robusto y arqueado, recubierto por una cutícula quitinosa, pero coronado por el rostro más sobrecogedor de la especie: la piel de su cara proyecta pigmentos dinámicos en constante transmutación, configurando manchas siniestras e inestables. Quienes lo observan, ven en su rostro sus propios miedos o sus más bajas perversiones. Tiene los ojos estrábicos, divergentes, orientados hacia ángulos opuestos del horizonte acuático, y unos brazos desproporcionados que se extienden bastante más abajo de sus caderas, terminando en garras romas.</p>
+            <p>Pero su estigma más doloroso es su espalda: un par de alas de Efemeróptero atrofiadas y arrugadas. EFE no puede volar. Mientras que los jóvenes sanos de su camada esperan con éxtasis el momento de metamorfosearse, salir a la superficie y elevarse en el aire para cumplir su destino, EFE sabe que está encadenado al lodo.</p>
+            <p>Psicológicamente, EFE es un abismo de introversión. Callado y ensimismado, pasa los días masticando una frustración venenosa. En “Hemera”, la existencia entera está programada para un único propósito: alcanzar la fase adulta <em>(imago)</em> para emerger a la atmósfera terrestre y disponer de apenas veinticuatro horas —el tiempo exacto que su biología resiste la oxidación del aire exterior— para copular, asegurar la fertilización y morir. La juventud en “Hemera” no es más que un período extenso de engorda metabólica para un acto suicida de menos de un día.</p>
+          </article>
+
+          <article id="cap-2" class="reader-chapter">
+            <div class="chapter-heading">II. El Mito Fundacional y las Sombras del Monolito</div>
+            <p>En el corazón de la ciudad se eleva la <strong>Torre Zenit</strong>. En su cumbre sobresale un holograma gigantesco de trescientos milímetros de altura, administrado por el enjambre de las Libélulas: la réplica tridimensional de <strong>Efímero</strong>, el “Primer Habitante”. El holograma, proyectado en una luz hipnótica, repite en bucle el relato de la Creación.</p>
+            <div class="quote-callout">
+              <strong>EFÍMERO, El Primer Habitante:</strong><br>
+              "En los días de la Gran Sequía, Efímero nadó contra las corrientes. Para evitar que la estirpe fuera devorada por depredadores del fango, se desprendió del aparato digestivo, laceró sus propios órganos internos y se clavó en la roca viva para canalizar la corriente biogénica. Su agonía duró mil auroras, y de la carne descompuesta de su tórax brotó el primer cimiento de “Hemera”. El sufrimiento de Efímero es la roca sobre la que descansa vuestra plenitud."
+            </div>
+            <p>A partir de este dogma, el Consejo de Libélulas —seres biomecánicos de tórax blindado y mandíbulas hidráulicas— ha codificado <em>“Los Dos Mandamientos de Nyx”</em>, grabados en las losas de platino de cada plaza:</p>
+            <div class="commandment-box">
+              <div class="commandment-title">LOS DOS MANDAMIENTOS DE NYX</div>
+              <div class="commandment-item">1. TU VIDA JUSTIFICA A “HEMERA”.</div>
+              <div class="commandment-item">2. TU MUERTE PRESERVA A “HEMERA”.</div>
+            </div>
+            <p>El pacto es irrenunciable: las Libélulas gobiernan, administran la distribución de alimento, mantienen las murallas electromagnéticas contra los depredadores salvajes y cuidan con recelo a las jóvenes ninfas. A cambio, la población se prepara voluntariamente para sacrificar su vida: <em>Tras la copulación frenética en la superficie, el macho colapsa instantáneamente con los órganos destrozados; la hembra, impulsada por un agonizante instinto final, desciende a las aguas para depositar los huevos en las incubadoras de las Libélulas antes de reventar por descompresión.</em> Nadie envejece. En “Hemera” no existe la vejez, ni la calvicie, ni las arrugas. El orden es perfecto.</p>
+          </article>
+
+          <article id="cap-3" class="reader-chapter">
+            <div class="chapter-heading">III. El Zarpazo del Sirirí</div>
+            <p>Un día, sumido en su aislamiento, EFE cometió un error. Buscando escapar del ruido y el ambiente festivo donde sus congéneres celebraban la cercanía de sus metamorfosis, nadó más allá del perímetro defensivo, hacia los límites sombríos del cañaveral abisal. Allí, donde la corriente del humedal se volvía fría y hedionda, flotó en solitario mirando el reflejo distorsionado del cielo.</p>
+            <p>El ataque ocurrió sin ruido. El agua se rasgó en un turbión de burbujas. Una red de filamentos de carbono, arrojada desde la superficie, se ciñó sobre su tórax con la ferocidad de una trampa de acero. EFE forcejeó, pero fue elevado vertiginosamente. El agua desapareció y el aire —seco, abrasador, tóxico— golpeó su sistema respiratorio con la violencia de mil agujas.</p>
+            <p>Un <strong>Sirirí biomecánico</strong> —un ave de plumas sintéticas, pico de aleación de titanio y ojos con lentes infrarrojos— lo sostenía a más de veinte metros sobre la vasta masa de lodo del humedal. El pájaro soltó un chirrido estridente que resonó en el cielo gris de Bogotá. Sin embargo, las deformidades de EFE jugaron a su favor: sus brazos largos y escuálidos encontraron una holgura en los nudos de la red, y la masa amorfa de sus alas rotas amortiguó el roce. Con un chasquido agónico, desarticuló su hombro izquierdo, resbaló entre la malla y cayó al vacío.</p>
+            <p>El impacto contra el fango de la orilla fue descomunal. El barro podrido lo tragó a medias; la conmoción cerebral apagó sus ojos y la mancha de su rostro se congeló en un patrón de pánico pálido. La oscuridad lo devoró.</p>
+          </article>
+
+          <article id="cap-4" class="reader-chapter">
+            <div class="chapter-heading">IV. El Dios de las Ruinas</div>
+            <p>Cuando EFE despertó, el dolor en su espalda era desgarrador. No estaba en el fango, ni bajo las luces deslumbrantes de “Hemera”. Se encontraba en el interior de una estructura sumergida, hecha de concreto y varillas oxidadas, inundada por el humedal marchito. Tabiques derruidos, algas podridas y cables podridos colgaban del techo. Fuera de la estancia, la penumbra era absoluta, mucho más allá del mapa seguro de la ciudad.</p>
+            <p>Un crujido metálico lo hizo estremecer. En un rincón sombrío, sentado sobre una silla de plástico rota y cubierta de verdín, una figura lo observaba. EFE intentó gritar, pero de su tráquea solo brotó un silbido seco. El desconocido se levantó con lentitud y avanzó hacia la camastro roto donde yacía EFE.</p>
+            <p>— No te asustes —dijo aquel anciano, con una voz opaca, semejante al roce de dos piedras sumergidas—. Me llamo <strong>Efímero</strong>, y te he encontrado en la superficie. Estabas muy malherido y al borde de ser cazado por un sirirí.<br>
+            — ¿Efímero? —respondió contrariado EFE, arrastrando las sílabas—. ¿De dónde vienes? Tu aspecto nunca lo he visto en “Hemera”. Pareces uno de nosotros, pero con rasgos que no logro reconocer... Tu piel está agrietada, tu cutícula desgastada...<br>
+            — Soy un viejo. Y como yo, claramente no ha habido ni habrá en “Hemera”.<br>
+            — ¿Cómo es posible? ¿Cómo dijo que se llama?<br>
+            — Efímero… y como lo estás sospechando, sí. Soy el fundador de “Hemera”.<br>
+            — ...<br>
+            — Es una historia muy difícil de recordar. Solo puedo decirte que esa gran civilización se ha convertido en algo que jamás imaginé.<br>
+            — ¿En serio es Efímero? Y si eso es cierto... ¿Por qué vive en estas condiciones? Usted es considerado como un dios por todos mis conciudadanos. No lo puedo creer…<br>
+            — Creo que ese es el destino de todo Dios. Sacrificar la vida humana por una imagen mística que se adapta a los intereses de los que negocian con la fe de los creyentes.<br>
+            — Esta cabaña es una ruina. ¿Por qué?<br>
+            — Las libélulas… se apoderaron de la ciudad y ahora administran “Hemera” con mercancía para los sirirís y otras aves.<br>
+            — Pero… ellas nos cuidan. Además, se aseguran de que todos nosotros tengamos comida y seguridad. No puede ser…<br>
+            — Ellas solo quieren garantizar que la mayoría lleguen a adultos para producir huevos, que luego venden y comercializan en una especie de mercado negro que tienen con varias aves que habitan en la superficie.<br>
+            — Por eso es que…<br>
+            — Sí. Por eso cuando los adultos se reproducen, tienen que morir. Así nadie se dará cuenta.<br>
+            — Increíble...<br>
+            — <strong>La muerte en 24 horas no es una imposición biológica de nuestra especie, EFE. Es un envenenamiento inducido.</strong> Cuando somos ninfas, las Libélulas nos implantan en el tórax un biochip endócrino bajo el pretexto de hacernos inmunes a las infecciones del agua. Ese chip libera una neurotóxina fulminante exactamente veinticuatro horas después de detectar el cambio de presión atmosférica al salir a la superficie. La mentira de la "naturaleza efímera" es el mecanismo de control perfecto.<br>
+            — ¿Y los depredadores? ¿El Sirirí que me atrapó?<br>
+            — Un cobrador de diezmo. Las Libélulas entregan un porcentaje de huevos frescos y ninfas defectuosas a las aves a cambio de no atacar la ciudad. “Hemera” no es un santuario; es una granja de reproducción de carne fina. Yo intenté detenerlas hace décadas, pero me mutilaron y me condenaron a pudrirme en estas ruinas para usar mi nombre como un tranquilizante de masas.<br>
+            — Me he sentido un monstruo toda mi vida por no poder volar... por odiar la Ley Efímero...<br>
+            — Tu deformidad te salvó, EFE. Tu tórax no asimiló la frecuencia del biochip de la misma manera, y tus alas tullidas te impidieron ascender al matadero voluntario. Vuelve a “Hemera”. Tienes que revelarles la verdad a los tuyos.<br>
+            — ¡No me escucharán! Aman sus cadenas. Creen que el sacrificio los vuelve héroes.<br>
+            — No los convencerás con palabras, sino con la destrucción de la mentira. Toma este transmisor electromagnético. Si logras llegar al servidor central de la Torre Zenith y desacoplar el monitor de la toxina, les devolverás la vida. Yo no puedo caminar más... pero tú tienes los brazos largos. Prométeme que derrocarás a las Libélulas.<br>
+            — No sé…</p>
+          </article>
+
+          <article id="cap-5" class="reader-chapter">
+            <div class="chapter-heading">V. La Sordera del Rebaño</div>
+            <p>EFE regresó a las profundidades de “Hemera” infiltrándose por los conductos de drenaje biológico. Pero el horror que encontró al volver fue más sofocante que el veneno de la superficie: la ceguera voluntaria de sus hermanos.</p>
+            <p>Intentó hablar con sus compañeros de camada. En los comedores de néctar sintético, entre banquetes de algas purificadas y masajes metabólicos, EFE les susurraba la verdad sobre el mercado negro de huevos, los biochips e incluso la supervivencia del viejo Efímero. Sin embargo, solo cosechó burlas y miradas de profundo desprecio.</p>
+            <p>—¿Pobreza? ¿Miseria? ¡Mira a tu alrededor, EFE! —le gritó Kael, uno de los atletas más prominentes, mientras moldeaba su cutícula para la metamorfosis—. Aquí no hay hambre. Las Libélulas nos dan todo. Volar veinticuatro horas, amar desbocadamente bajo el sol y morir como héroes preservando el equilibrio es el honor supremo. Tú solo hablas así porque eres un deforme tullido que jamás podrá alzar el vuelo.</p>
+            <p>Incluso la amenaza de la ejecución los dejaba indiferentes. En “Hemera”, aquellas ninfas que por fallos genéticos no desarrollaban alas ni la capacidad de volar eran conducidas pacíficamente a la "Cámara de Transición": recintos herméticos donde se extraía el agua paulatinamente hasta disolver los cuerpos en nitrógeno seco. Los ciudadanos aplaudían el proceso, convencidos de que era una limpieza piadosa para evitar el déficit de recursos. EFE entendió entonces que la tiranía de las Libélulas no se sostenía en las armas, sino en el confort.</p>
+          </article>
+
+          <article id="cap-6" class="reader-chapter">
+            <div class="chapter-heading">VI. La Rebelión de los Malditos y la Traición</div>
+            <p>Trabajando en la clandestinidad de las cloacas de la ciudad, EFE logró reclutar a los únicos que el sistema había deschavetado: los parias, las ninfas con imperfecciones estéticas y los condenados a la Cámara de Transición. Usando herramientas quirúrgicas robadas, EFE utilizó sus largos y precisos dedos para extirpar a ciegas los biochips incrustados en las vértebras torácicas de una docena de rebeldes.</p>
+            <p>Conoció las rutas secretas donde las Libélulas empaquetaban los huevos para entregarlas a las escuadras de Sirirís en la superficie. Tenían un plan: aprovechar el próximo ciclo de eclosión masiva para ascender por el ducto principal de ventilación, inhabilitar la torre de control de las Libélulas e interrumpir el mercado negro, mostrando a la población los contenedores de comercialización.</p>
+            <p>Pero el virus del siervo es la lealtad al amo. Horas antes del ascenso, Vane, uno de los rebeldes a quien el miedo paralizó la razón, corrió hacia el Puesto del Comandante. Convencido de que delatando a EFE obtendría el perdón divino y la regeneración artificial de sus alas, entregó los mapas y las frecuencias de la conspiración.</p>
+          </article>
+
+          <article id="cap-7" class="reader-chapter">
+            <div class="chapter-heading">VII. La Matanza en la Superficie</div>
+            <p>El ascenso por el tubo de ventilación hacia la superficie fue un infierno de presión hidrostática y vapor. El grupo rebelde, exhausto y con la piel ardiendo por la ausencia del chip regulador, emergió finalmente a la luz estridente y sofocante del humedal exterior.</p>
+            <p>Pero no hubo revolución. Había una emboscada.</p>
+            <p>El cielo no estaba vacío. Un escuadrón de Sirirís biomecánicos aguardaba en picado, con las garras de acero abiertas y las pupilas infrarrojas fijas en la brecha del agua. A su lado, planeando con un zumbido ensordecedor de alas transparentes, la Libélula Comandante observaba con fría indiferencia de insecto.</p>
+            <p>La matanza fue ejecutada con una precisión quirúrgica. Las aves descendieron como centellas de plumas y titanio. Los gritos de las ninfas amortiguados por la viscosidad del lodo resonaron por todo el cañaveral. La carne de los rebeldes era desgarrada en el aire; las cavidades torácicas eran abiertas para extraer los sacos reproductivos antes de que los cuerpos cayeran, destrozados, sobre el lodo fangoso.</p>
+            <p>EFE combatió con la desesperación de una bestia acorralada. Usó sus brazos desmesurados para aferrarse al cuello de un Sirirí, hundiéndole las garras en los circuitos ópticos hasta hacerlo estrellarse contra las rocas. Recibió un impacto de pico metálico en el costado que le fracturó la cutícula y le destrozó lo que quedaba de sus alas vestigiales.</p>
+            <p>El sol de Bogotá comenzaba a ocultarse tras una bruma tóxica de color plomo. El silencio descendió sobre la orilla del humedal, interrumpido solo por el burbujeo de la sangre acuática y el crujido de sus camaradas, devorados y mutilados a su alrededor.</p>
+          </article>
+
+          <article id="cap-8" class="reader-chapter">
+            <div class="chapter-heading">VIII. "No viviré para morir"</div>
+            <p>Tumbado sobre el lodo podrido, bañado en su propia hemolinfa verdosa y en la sangre agria de sus hermanos, EFE yacía de espaldas. El aire del exterior devoraba sus pulmones, pero la muerte no llegaba. Al no tener el biochip endócrino, su cuerpo resentía la oxidación, pero resistía. <em>El veneno no estaba en su sangre; la mentira se había roto.</em></p>
+            <p>A pocos metros, la Libélula Comandante descendió sobre un junco seco, limpiándose las mandíbulas impregnadas de víscera con una pata delantera.</p>
+            <p>—Criatura defectuosa —zumbó la Libélula con una voz sintética y modulada—. Creíste que podías alterar el ciclo. “Hemera” seguirá próspera. Los tuyos seguirán muriendo felices creyendo que son dioses de un día. ¿Y tú qué ganaste?</p>
+            <p>EFE arrastró su cuerpo lesionado sobre la tierra negra. La mancha de su rostro se reorganizó lentamente, adoptando la forma de una calavera dividida por una grieta abisal. Fijó sus ojos estrábicos en la criatura y, aferrándose con sus largas manos al cuello de un camarada muerto, susurró con un hilo de voz cavernoso, lleno de un odio:</p>
+            <div class="quote-callout" style="border-color:var(--neon); background:rgba(255,0,127,0.1); color:#fff; font-size:1.15rem;">
+              —No viviré para morir...
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="reader-actions">
+        <a href="assets/relato.pdf" download="Relato_No_Vivire_Para_Morir.pdf" class="btn-reader-action">
+          <span>📥</span> Descargar Relato en PDF
+        </a>
+        <button class="btn-reader-action" onclick="navigator.clipboard.writeText(document.querySelector('.reader-body').innerText); alert('¡Relato completo copiado al portapapeles!');">
+          <span>📋</span> Copiar Texto Completo
+        </button>
+        <button class="btn-reader-action" style="border-color:var(--fire); color:var(--fire);" onclick="document.querySelector('[data-product=comic]').click();">
+          <span>➔</span> Pasar a la Novela Gráfica (Cómic EFE.pdf)
+        </button>
+      </div>
+    `
+  },
+
+  // MÓDULO 2: EL CÓMIC
+  comic: {
+    title: 'RORSCHACH NOCTURNO',
+    color: '#7A573F',
+    html: `
+      <div class="comic-modal-container">
+        <div class="comic-header">
+          <div class="reader-meta">
+            <span class="reader-meta-item" style="color:#E67E22; border-color:#E67E22;">Novela Gráfica</span>
+            <span class="reader-meta-item">EFE.pdf · 12 Páginas</span>
+            <span class="reader-meta-item">Entintado Sepia & Biopunk</span>
+          </div>
+          <h2 class="comic-panel-title">NO VIVIRÉ PARA MORIR · EL CÓMIC (EFE.PDF)</h2>
+          <div class="reader-subtitle" style="color:var(--armor);">Novela Gráfica Completa y Análisis Visual del Universo</div>
+
+          <div class="view-mode-tabs">
+            <button type="button" class="view-mode-tab active" id="tab-pdf-comic" onclick="switchProductSubView('comic', 'pdf')">
+              <span>📚</span> Visor Cómic Completo (EFE.pdf · 12 Págs.)
+            </button>
+            <button type="button" class="view-mode-tab" id="tab-web-comic" onclick="switchProductSubView('comic', 'web')">
+              <span>🖼️</span> Viñeta de Presentación & Ficha Semiótica
+            </button>
+            <a href="assets/EFE.pdf" download="EFE.pdf" class="view-mode-tab" style="margin-left:auto; text-decoration:none; border-color:var(--fire); color:var(--fire);">
+              <span>📥</span> Descargar EFE.pdf
+            </a>
+          </div>
+        </div>
+
+        <!-- VISOR PDF INTEGRADO DEL CÓMIC (EFE.PDF) -->
+        <div id="subview-pdf-comic">
+          <div class="pdf-viewer-shell" id="pdf-shell-comic">
+            <div class="pdf-toolbar">
+              <div class="pdf-toolbar-group">
+                <button type="button" class="pdf-btn" id="pdf-prev-comic" title="Página anterior (←)">◀ Anterior</button>
+                <span class="pdf-page-indicator" id="pdf-page-info-comic">PÁG. 1 / 12</span>
+                <button type="button" class="pdf-btn" id="pdf-next-comic" title="Página siguiente (→)">Siguiente ▶</button>
+              </div>
+              <div class="pdf-toolbar-group">
+                <button type="button" class="pdf-btn active-mode" id="pdf-mode-single-comic" title="Ver página por página">📄 1 Pág.</button>
+                <button type="button" class="pdf-btn" id="pdf-mode-scroll-comic" title="Ver todas las páginas en cascada">📜 Cascada</button>
+                <button type="button" class="pdf-btn" id="pdf-mode-native-comic" title="Usar visor PDF nativo del navegador">🌐 Visor Nativo</button>
+              </div>
+              <div class="pdf-toolbar-group">
+                <button type="button" class="pdf-btn" id="pdf-zoom-out-comic" title="Reducir zoom">−</button>
+                <span class="pdf-zoom-label" id="pdf-zoom-val-comic">100%</span>
+                <button type="button" class="pdf-btn" id="pdf-zoom-in-comic" title="Aumentar zoom">+</button>
+                <button type="button" class="pdf-btn" id="pdf-fullscreen-comic" title="Pantalla completa">⛶</button>
+              </div>
+            </div>
+            <div class="pdf-canvas-viewport" id="pdf-viewport-comic">
+              <div class="pdf-loading-state">CARGANDO CÓMIC EFE.PDF...</div>
+            </div>
+            <div class="pdf-page-pills" id="pdf-pills-comic"></div>
+          </div>
+        </div>
+
+        <!-- FICHA SEMIÓTICA Y LÁMINA CLAVE -->
+        <div id="subview-web-comic" style="display:none;">
+          <div class="comic-layout">
+            <div class="comic-frame">
+              <div class="comic-img-wrapper" title="Haz clic para ver en tamaño completo" onclick="window.open('assets/comic_portada.webp', '_blank')">
+                <img src="assets/comic_portada.webp" alt="Splash Page de Rorschach Nocturno: EFE emergiendo del humedal con su rostro de calavera mutante" class="comic-img">
+                <div class="comic-tag-overlay">PANEL CLAVE · RESOLUCIÓN DEL LIBRO I</div>
+              </div>
+            </div>
+
+            <div class="comic-details">
+              <div class="comic-quote">
+                "NO VIVIRÉ PARA MORIR... NO VIVIRÉ PARA MORIR..."
+              </div>
+              
+              <p class="comic-description-text">
+                La imagen de presentación captura el clímax visual de la narrativa: tras el fracaso de la rebelión y la matanza perpetrada por los Sirirís mecánicos, <strong>EFE</strong> emerge del lodo ponzoñoso del humedal de Bogotá. Sus alas vestigiales destrozadas se alzan como muñones grotescos contra el cielo plomizo de la capital.
+              </p>
+
+              <div class="comic-specs-grid">
+                <div class="spec-card">
+                  <div class="spec-label">Estilo Visual</div>
+                  <div class="spec-value">Tinta china y trama sepia</div>
+                </div>
+                <div class="spec-card">
+                  <div class="spec-label">Atmósfera</div>
+                  <div class="spec-value">Biopunk & Noir distópico</div>
+                </div>
+                <div class="spec-card">
+                  <div class="spec-label">Ubicación</div>
+                  <div class="spec-value">Humedal de Bogotá / Skyline derruido</div>
+                </div>
+                <div class="spec-card">
+                  <div class="spec-label">Personaje</div>
+                  <div class="spec-value">EFE (Fase Ninfa Renegada)</div>
+                </div>
+              </div>
+
+              <div class="comic-script-box">
+                <div style="font-weight:bold; color:var(--fire); margin-bottom:0.6rem; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em;">
+                  Desglose Semiótico de la Viñeta:
+                </div>
+                <div class="script-step">
+                  <strong>1. El Rostro de Rorschach:</strong> La cutícula facial de EFE no posee facciones humanas fijas; muta en pigmentos dinámicos que simulan una calavera hendida, reflejo de la muerte de sus congéneres.
+                </div>
+                <div class="script-step">
+                  <strong>2. Los Brazos Desmesurados:</strong> Sus extremidades largas, consideradas una aberración en Hemera, se convierten en su única arma para desgarrar las aleaciones de los Sirirís.
+                </div>
+                <div class="script-step">
+                  <strong>3. El Horizonte Urbano:</strong> Al fondo, los rascacielos sumergidos en la polución de Bogotá recuerdan la superficie hostil que las Libélulas utilizan para su granja de reproducción.
+                </div>
+              </div>
+
+              <div style="display:flex; gap:0.8rem; margin-top:0.5rem; flex-wrap:wrap;">
+                <a href="assets/EFE.pdf" download="EFE.pdf" class="btn-reader-action" style="border-color:var(--fire); color:var(--fire);">
+                  <span>📥</span> Descargar Cómic Completo (EFE.pdf)
+                </a>
+                <a href="assets/comic_portada.webp" download="EFE_Rorschach_Nocturno_Comic.webp" class="btn-reader-action">
+                  <span>🖼️</span> Descargar Splash Page
+                </a>
+                <button class="btn-reader-action" onclick="document.querySelector('[data-product=historia]').click();">
+                  <span>📖</span> Ver Relato (PDF / Capítulos)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+
+  // MÓDULO 3: EL PODCAST
+  podcast: {
+    title: 'FRECUENCIAS DEL PANTANO: EL DIOS DE LAS RUINAS',
+    color: '#10B981',
+    html: `
+      <div class="podcast-modal-container">
+        <div class="podcast-header">
+          <div class="reader-meta">
+            <span class="reader-meta-item" style="color:#10B981; border-color:#10B981;">Audioficción Transmedia</span>
+            <span class="reader-meta-item">Episodio 1: El Dios de las Ruinas</span>
+            <span class="reader-meta-item">Duración: 01:39</span>
+            <span class="reader-meta-item">Archivo Interceptado</span>
+          </div>
+          <h2 class="reader-title" style="color:#E2E8F0;">FRECUENCIAS DEL PANTANO</h2>
+          <div class="reader-subtitle" style="color:var(--emerald);">Episodio I: El Encuentro con Efímero y la Revelación del Biochip</div>
+          <p style="color:#94A3B8; font-size:0.9rem; line-height:1.6; margin:0;">
+            Registro acústico clandestino capturado por hidrófonos biotecnológicos en las ruinas sumergidas de concreto, más allá del perímetro defensivo de Hemera. 
+            Contiene el diálogo fundacional donde el viejo Efímero entrega el transmisor a EFE.
+          </p>
+        </div>
+
+        <div class="podcast-player-box">
+          <div class="podcast-hud-display">
+            <div class="podcast-freq-badge">
+              <div class="freq-dot"></div>
+              <span>SINTONIZANDO: FRECUENCIA RESIDENCIAL 104.7 KHz (CLOACAS)</span>
+            </div>
+            <div style="color:var(--wing); letter-spacing:0.1em;">
+              ESTADO: <span id="player-state-text" style="color:var(--emerald);">LISTO PARA REPRODUCIR</span>
+            </div>
+          </div>
+
+          <audio id="podcast-audio" preload="metadata" src="assets/podcast_frecuencias_pantano.mp3"></audio>
+
+          <div id="podcast-eq" class="podcast-eq-container" aria-hidden="true">
+            <div class="eq-bar" style="animation-delay: 0.1s"></div>
+            <div class="eq-bar" style="animation-delay: 0.3s"></div>
+            <div class="eq-bar" style="animation-delay: 0.05s"></div>
+            <div class="eq-bar" style="animation-delay: 0.4s"></div>
+            <div class="eq-bar" style="animation-delay: 0.2s"></div>
+            <div class="eq-bar" style="animation-delay: 0.5s"></div>
+            <div class="eq-bar" style="animation-delay: 0.15s"></div>
+            <div class="eq-bar" style="animation-delay: 0.35s"></div>
+            <div class="eq-bar" style="animation-delay: 0.25s"></div>
+            <div class="eq-bar" style="animation-delay: 0.45s"></div>
+            <div class="eq-bar" style="animation-delay: 0.1s"></div>
+            <div class="eq-bar" style="animation-delay: 0.3s"></div>
+            <div class="eq-bar" style="animation-delay: 0.15s"></div>
+            <div class="eq-bar" style="animation-delay: 0.5s"></div>
+            <div class="eq-bar" style="animation-delay: 0.2s"></div>
+            <div class="eq-bar" style="animation-delay: 0.4s"></div>
+            <div class="eq-bar" style="animation-delay: 0.05s"></div>
+            <div class="eq-bar" style="animation-delay: 0.35s"></div>
+            <div class="eq-bar" style="animation-delay: 0.25s"></div>
+            <div class="eq-bar" style="animation-delay: 0.45s"></div>
+          </div>
+
+          <div class="podcast-controls">
+            <button id="podcast-toggle-btn" class="podcast-play-btn" title="Reproducir / Pausar">
+              ▶
+            </button>
+            <div class="podcast-timeline">
+              <div id="podcast-timeline-bar" class="timeline-bar-wrapper">
+                <div id="podcast-progress-fill" class="timeline-progress-fill"></div>
+              </div>
+              <div class="timeline-timestamps">
+                <span id="podcast-current-time">00:00</span>
+                <span id="podcast-total-time">01:39</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 style="color:#fff; font-size:1.15rem; margin:1.5rem 0 0.8rem 0; letter-spacing:1px; display:flex; justify-content:space-between; align-items:center;">
+            <span>TRANSCRIPCIÓN ÍNTEGRA DE LA TRANSMISIÓN</span>
+            <span style="font-size:0.75rem; color:var(--emerald); font-weight:normal;">Haz clic en un diálogo para saltar a ese segundo</span>
+          </h3>
+          <div class="transcript-box">
+            <div class="dialogue-entry" onclick="seekPodcast(2)">
+              <span class="dialogue-time">[00:02]</span>
+              <span class="dialogue-speaker-efimero">EFÍMERO:</span>
+              "No te asustes... Soy Efímero. Te salvé de un Sirirí en la superficie."
+            </div>
+            <div class="dialogue-entry" onclick="seekPodcast(11)">
+              <span class="dialogue-time">[00:11]</span>
+              <span class="dialogue-speaker-efe">EFE:</span>
+              "¡Efímero! ¿El fundador de Hemera? Eres considerado un Dios por todos nosotros... ¿Por qué vives en estas ruinas?"
+            </div>
+            <div class="dialogue-entry" onclick="seekPodcast(24)">
+              <span class="dialogue-time">[00:24]</span>
+              <span class="dialogue-speaker-efimero">EFÍMERO:</span>
+              "Es el destino de todo Dios... Las Libélulas se apoderaron de la ciudad. Hemera no es un santuario, es un centro de recolección..."
+            </div>
+            <div class="dialogue-entry" onclick="seekPodcast(40)">
+              <span class="dialogue-time">[00:40]</span>
+              <span class="dialogue-speaker-efe">EFE:</span>
+              "¡No puede ser! Ellas nos cuidan y nos dan seguridad..."
+            </div>
+            <div class="dialogue-entry" onclick="seekPodcast(49)">
+              <span class="dialogue-time">[00:49]</span>
+              <span class="dialogue-speaker-efimero">EFÍMERO:</span>
+              "Solo crían para vender sus huevos a las aves... Bobedades... La partida en 24 horas no es biológica: es un apagado programado por un biochip. Yo intenté detenerlas, y me atacaron dejándome graves heridas..."
+            </div>
+            <div class="dialogue-entry" onclick="seekPodcast(71)">
+              <span class="dialogue-time">[01:11]</span>
+              <span class="dialogue-speaker-efe">EFE:</span>
+              "Me he sentido una falla toda mi vida por no poder volar..."
+            </div>
+            <div class="dialogue-entry" onclick="seekPodcast(76)">
+              <span class="dialogue-time">[01:16]</span>
+              <span class="dialogue-speaker-efimero">EFÍMERO:</span>
+              "Tu condición física te salvó. Tu tórax no asimiló el chip. Vuelve a Hemera, toma este transmisor, llega al servidor central de la Torre Zenit y desactiva el sistema de control. Prométeme que derrocarás a las Libélulas."
+            </div>
+            <div class="dialogue-entry" onclick="seekPodcast(96)">
+              <span class="dialogue-time">[01:36]</span>
+              <span class="dialogue-speaker-efe">EFE:</span>
+              "No... sé..."
+            </div>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:1.2rem 1.4rem;">
+          <h4 style="color:var(--emerald); margin:0 0 0.5rem 0; font-family:'Space Grotesk',sans-serif; letter-spacing:0.08em; text-transform:uppercase; font-size:0.85rem;">
+            Aporte Narrativo del Podcast a la Biblia Transmedia:
+          </h4>
+          <p style="font-size:0.9rem; color:#CBD5E1; line-height:1.6; margin:0;">
+            El podcast funciona como la voz íntima y no censurada del mundo sumergido. Mientras que la Torre Zenit proyecta propaganda visual hipnótica y el cómic retrata la crudeza del combate físico, el audio transporta al espectador al claustrofóbico susurro de las ruinas, permitiendo escuchar la decrepitud vocal de Efímero y la vulnerabilidad psicológica de EFE antes de su transformación en insurgente.
+          </p>
+        </div>
+
+        <div class="reader-actions" style="border-color:rgba(77,94,77,0.4);">
+          <a href="assets/podcast_frecuencias_pantano.mp3" download="Frecuencias_Del_Pantano_Episodio_1.mp3" class="btn-reader-action" style="border-color:var(--emerald); color:var(--emerald);">
+            <span>📥</span> Descargar Audio en MP3 (2.4 MB)
+          </a>
+          <button class="btn-reader-action" onclick="document.querySelector('[data-product=historia]').click();">
+            <span>📖</span> Leer el Capítulo Correspondiente (IV)
+          </button>
+        </div>
+      </div>
+    `
+  },
+
+  ar: {
+    title: 'Carta de Personaje: EFEMERO (AR)',
+    color: '#8A959D',
+    html: `
+      <div class="comic-modal-container">
+        <div class="comic-header" style="border-color:rgba(0,229,255,0.35);">
+          <div class="reader-meta">
+            <span class="reader-meta-item" style="color:#00E5FF; border-color:#00E5FF;">Realidad Aumentada</span>
+            <span class="reader-meta-item">Carta de Personaje (Funciona con AR)</span>
+            <span class="reader-meta-item">Marcador Escaneable</span>
+          </div>
+          <h2 class="comic-panel-title" style="text-shadow:0 0 15px rgba(0,229,255,0.35);">CARTA DE PERSONAJE: EFEMERO</h2>
+          <div class="reader-subtitle" style="color:var(--cyan);">Ficha Escaneable para Experiencia de Realidad Aumentada</div>
+        </div>
+
+        <div class="comic-layout">
+          <div class="comic-frame" style="border-color:var(--cyan); box-shadow:0 15px 40px rgba(0,0,0,0.9), 0 0 25px rgba(0,229,255,0.2);">
+            <div class="comic-img-wrapper" title="Haz clic para abrir la carta en tamaño completo" onclick="window.open('assets/carta_efemero_ar.jpg', '_blank')">
+              <img src="assets/carta_efemero_ar.jpg" alt="Carta de personaje EFEMERO — Marcador oficial para Realidad Aumentada" class="comic-img">
+              <div class="comic-tag-overlay" style="border-color:var(--cyan); color:var(--cyan);">FICHA AR · ESCANEAR EN PANTALLA O IMPRESA</div>
+            </div>
+          </div>
+
+          <div class="comic-details">
+            <p style="margin:0; padding:0.9rem 1.1rem; background:rgba(0,229,255,0.09); border-left:3px solid #00E5FF; border-radius:6px; font-size:0.92rem; line-height:1.6; color:#E0F2FE;">
+              <strong>ℹ️ Instrucciones y aviso importante:</strong> Para activar la Realidad Aumentada debes <strong>escanear con la cámara la ficha/carta de personaje que aparece en pantalla</strong> (pensada originalmente para estar <strong>impresa</strong> en formato físico). Al abrir el enlace, la experiencia AR se cargará en una <strong>ventana nueva</strong> y podrás regresar a esta web cuando lo desees.
+            </p>
+
+            <p class="comic-description-text">
+              <em>«Un ser misterioso de presencia fugaz, cuyas intenciones son tan variadas como los patrones de su máscara.»</em>
+            </p>
+
+            <div class="comic-specs-grid">
+              <div class="spec-card">
+                <div class="spec-label">Personaje</div>
+                <div class="spec-value">EFEMERO (DARK · ★6)</div>
+              </div>
+              <div class="spec-card">
+                <div class="spec-label">Estadísticas</div>
+                <div class="spec-value">ATK 2400 / DEF 1900</div>
+              </div>
+            </div>
+
+            <div class="comic-script-box" style="border-color:rgba(0,229,255,0.28);">
+              <div style="font-weight:bold; color:var(--cyan); margin-bottom:0.6rem; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em;">
+                Habilidades de la Carta:
+              </div>
+              <div class="script-step">
+                <strong style="color:var(--cyan);">(1) Perspicacia del Rorschach:</strong> Revela la carta superior del mazo de tu oponente una vez por duelo.
+              </div>
+              <div class="script-step">
+                <strong style="color:var(--cyan);">(2) Enredo Espinoso:</strong> Si esta carta ataca, tu oponente no puede activar efectos de cartas hasta el final del paso de daño.
+              </div>
+              <div class="script-step">
+                <strong style="color:var(--cyan);">(3) Escudo Efímero:</strong> Evita que esta carta sea destruida por efectos de cartas una vez por turno.
+              </div>
+            </div>
+
+            <div style="display:flex; gap:0.8rem; margin-top:0.5rem; flex-wrap:wrap;">
+              <a href="https://edwardalexandertf.github.io/efemer/" target="_blank" rel="noopener noreferrer" class="btn-reader-action" style="border-color:var(--cyan); color:var(--cyan);">
+                <span>📱</span> Abrir Experiencia AR en Nueva Ventana ↗
+              </a>
+              <a href="assets/carta_efemero_ar.jpg" download="Carta_Personaje_EFEMERO_AR.jpg" class="btn-reader-action" style="border-color:var(--wing); color:var(--offwhite);">
+                <span>🖨️</span> Descargar Ficha para Imprimir
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+  videojuego: {
+    title: "Aether's Stain: El Ciclo Manchado",
+    color: '#E67E22',
+    html: `
+      <div style="padding:1rem 0;">
+        <span class="format-badge" style="background:#E67E22; color:#000;">Videojuego 2.5D · Raycaster Biopunk</span>
+        <h3 style="color:#E67E22; margin:0.8rem 0;">Aether's Stain: El Ciclo Manchado</h3>
+        <p class="description">
+          Encarna a <strong>EFE ("El Manchado")</strong> en las entrañas del humedal industrial. Usa tu látigo mecano-espinoso, recolecta los biochips plateados en los 4 sectores y alcanza el Epílogo del Gran Sol.
+        </p>
+        <p style="margin:1rem 0 0 0; padding:0.75rem 1rem; background:rgba(230,126,34,0.1); border-left:3px solid #E67E22; border-radius:4px; font-size:0.86rem; line-height:1.5; color:#F5CBA7;">
+          <strong>ℹ️ Aviso:</strong> El videojuego se abrirá en una ventana nueva. Esta web permanecerá abierta para que puedas regresar cuando lo desees.
+        </p>
+        <div class="reader-actions" style="border-color:rgba(230,126,34,0.35);">
+          <a href="https://maagomezc85.github.io/aethers-stain/" target="_blank" rel="noopener noreferrer" class="btn-reader-action" style="border-color:var(--fire); color:var(--fire);">
+            <span>🎮</span> Abrir Videojuego en Nueva Ventana ↗
+          </a>
+        </div>
+      </div>
+    `
+  }
+};
+</script>
+
+<script>
+/* ==========================================================
+   2. THREE.JS — ENTORNO 3D MEJORADO (HEMERA v2)
+   Mejoras: shader de agua/fango, bioluminiscencia reactiva,
+   cañaverales procedurales, burbujas instanciadas, ninfa EFE
+   con branquias animadas, post-processing (Bloom + grano),
+   control de calidad adaptativo.
+   ========================================================== */
+const canvas = document.getElementById('webgl-canvas');
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x061214, 0.045);
+
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 200);
+camera.position.set(0, 4, 14);
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
+
+/* ---- DETECCIÓN DE CALIDAD ADAPTATIVA ---- */
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || innerWidth < 820;
+const QUALITY = {
+  particles: isMobile ? 320 : 900,
+  bubbles: isMobile ? 48 : 90,
+  reeds: isMobile ? 60 : 160,
+  postfx: !isMobile && !prefersReducedMotion   // post-proceso solo en escritorio
+};
+// Opción A: arrancamos SIEMPRE en modo básico (sin post-proceso) para que la
+// carga inicial sea ligera. El usuario lo activa con el botón ✦ FX.
+let postFxEnabled = false;
+
+/* Reloj y puntero global (para bioluminiscencia reactiva) */
+const clock = new THREE.Clock();
+const pointerNDC = new THREE.Vector2(0, 0);     // -1..1
+const pointerWorld = new THREE.Vector3();        // posición aproximada del cursor en el mundo
+const pointerRay = new THREE.Raycaster();
+const interactionPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -2); // z ≈ 2
+
+/* Iluminación */
+scene.add(new THREE.AmbientLight(0x0a1a1f, 0.9));
+const sun = new THREE.DirectionalLight(0x4a7c8c, 0.9);
+sun.position.set(5, 20, 8);
+scene.add(sun);
+
+const pPink = new THREE.PointLight(0xff007f, 3, 22);
+pPink.position.set(-6, 4, -5);
+scene.add(pPink);
+
+const pCyan = new THREE.PointLight(0x00e5ff, 2.8, 22);
+pCyan.position.set(6, 5, -4);
+scene.add(pCyan);
+
+/* ==========================================================
+   MEJORA 1: SHADER DE AGUA / FANGO ORGÁNICO
+   Plano con desplazamiento irregular (no uniforme, tipo pantano).
+   ========================================================== */
+const waterUniforms = {
+  uTime:       { value: 0 },
+  uTurbulence: { value: 0.75 },
+  uColorDeep:  { value: new THREE.Color(0x04140f) },
+  uColorShallow:{ value: new THREE.Color(0x0c3a33) },
+  uGlow:       { value: new THREE.Color(0x10b981) }
+};
+
+const waterMaterial = new THREE.ShaderMaterial({
+  uniforms: waterUniforms,
+  transparent: true,
+  side: THREE.DoubleSide,
+  depthWrite: false,
+  vertexShader: `
+    uniform float uTime;
+    uniform float uTurbulence;
+    varying vec2 vUv;
+    varying float vElev;
+
+    // Ruido pseudo-aleatorio ligero para ondas no uniformes (fango denso)
+    float wave(vec2 p) {
+      float a = sin(p.x * 0.6 + uTime * 0.8) * cos(p.y * 0.5 + uTime * 0.55);
+      float b = sin(p.x * 1.7 - uTime * 0.6 + 2.0) * 0.5;
+      float c = cos(p.y * 2.3 + uTime * 0.4) * 0.35;
+      return (a + b + c) * uTurbulence;
+    }
+
+    void main() {
+      vUv = uv;
+      vec3 pos = position;
+      float e = wave(pos.xy);
+      pos.z += e;
+      vElev = e;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 uColorDeep;
+    uniform vec3 uColorShallow;
+    uniform vec3 uGlow;
+    varying vec2 vUv;
+    varying float vElev;
+
+    void main() {
+      float d = smoothstep(-0.6, 0.9, vElev);
+      vec3 col = mix(uColorDeep, uColorShallow, d);
+      // brillo bioluminiscente en las crestas
+      col += uGlow * pow(max(vElev, 0.0), 2.0) * 0.5;
+      // bordes se desvanecen (circular)
+      float edge = smoothstep(0.5, 0.15, distance(vUv, vec2(0.5)));
+      gl_FragColor = vec4(col, 0.82 * edge);
+    }
+  `
+});
+
+const waterGeo = new THREE.PlaneGeometry(80, 80, 96, 96);
+const waterMesh = new THREE.Mesh(waterGeo, waterMaterial);
+waterMesh.rotation.x = -Math.PI / 2;
+waterMesh.position.y = -2.4;
+scene.add(waterMesh);
+
+/* ==========================================================
+   MEJORA 2: PARTÍCULAS BIOLUMINISCENTES REACTIVAS AL CURSOR
+   Pulsan en brillo individual y "huyen" del puntero.
+   ========================================================== */
+const pCount = QUALITY.particles;
+const pGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(pCount * 3);
+const pCol = new Float32Array(pCount * 3);
+const pPhase = new Float32Array(pCount);
+const pSpeed = new Float32Array(pCount);
+const biolumPalette = [
+  new THREE.Color(0x00e5ff),
+  new THREE.Color(0x34d399),
+  new THREE.Color(0xffb300)
+];
+for (let i = 0; i < pCount; i++) {
+  pPos[i*3]   = (Math.random() - 0.5) * 40;
+  pPos[i*3+1] = Math.random() * 16;
+  pPos[i*3+2] = (Math.random() - 0.5) * 40;
+  const c = biolumPalette[Math.floor(Math.random() * biolumPalette.length)];
+  pCol[i*3] = c.r; pCol[i*3+1] = c.g; pCol[i*3+2] = c.b;
+  pPhase[i] = Math.random() * Math.PI * 2;
+  pSpeed[i] = 0.5 + Math.random() * 2.0;
+}
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+pGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
+const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({
+  size: 0.14, transparent: true, opacity: 0.75,
+  vertexColors: true, depthWrite: false, blending: THREE.AdditiveBlending
+}));
+scene.add(particles);
+
+/* ==========================================================
+   MEJORA 3: BURBUJAS DE FANGO (InstancedMesh con deformación)
+   Ascienden, crecen y se achatan al llegar a la superficie.
+   ========================================================== */
+const bubbleCount = QUALITY.bubbles;
+const bubbleGeoInst = new THREE.SphereGeometry(1, 10, 10);
+const bubbleMatInst = new THREE.MeshPhysicalMaterial({
+  color: 0x4a3520, transmission: 0.6, roughness: 0.12, thickness: 0.3,
+  transparent: true, opacity: 0.55, metalness: 0.0,
+  emissive: 0x10b981, emissiveIntensity: 0.08
+});
+const bubbleMesh = new THREE.InstancedMesh(bubbleGeoInst, bubbleMatInst, bubbleCount);
+bubbleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+const bubbleData = [];
+for (let i = 0; i < bubbleCount; i++) {
+  bubbleData.push({
+    x: (Math.random() - 0.5) * 42,
+    y: -2 - Math.random() * 20,
+    z: (Math.random() - 0.5) * 42,
+    speed: 0.012 + Math.random() * 0.03,
+    scale: 0.04 + Math.random() * 0.09,
+    phase: Math.random() * Math.PI * 2
+  });
+}
+const _bMat = new THREE.Matrix4();
+const _bPos = new THREE.Vector3();
+const _bScl = new THREE.Vector3();
+const _bQuat = new THREE.Quaternion();
+scene.add(bubbleMesh);
+
+/* ==========================================================
+   OBJETOS INTERACTIVOS (registro)
+   ========================================================== */
+const objects = [];
+
+function registerInteractive(obj, id, label, baseY) {
+  obj.userData = { id, label, baseY };
+  obj.traverse(child => {
+    if (child.isMesh && child.material && child.material.emissive) {
+      child.userData.baseEmissive = child.material.emissiveIntensity || 0.2;
+    }
+  });
+  scene.add(obj);
+  objects.push(obj);
+}
+
+function makeObj(geo, color, pos, id, label) {
+  const mat = new THREE.MeshStandardMaterial({
+    color: color,
+    roughness: 0.4,
+    emissive: color,
+    emissiveIntensity: 0.2
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(...pos);
+  registerInteractive(mesh, id, label, pos[1]);
+  return mesh;
+}
+
+const textureLoader = new THREE.TextureLoader();
+
+/* ==========================================================
+   MEJORA 4: CAÑAVERALES PROCEDURALES CON VIENTO
+   Tubos curvados que oscilan con una brisa sinusoidal.
+   ========================================================== */
+const reedField = new THREE.Group();
+scene.add(reedField);
+for (let i = 0; i < QUALITY.reeds; i++) {
+  const height = 1.6 + Math.random() * 3.2;
+  const segs = 7;
+  const sway = 0.1 + Math.random() * 0.18;
+  const pts = [];
+  for (let j = 0; j <= segs; j++) {
+    const u = j / segs;
+    pts.push(new THREE.Vector3(Math.sin(u * 1.4) * 0.12 * u, u * height, Math.cos(u * 1.1) * 0.08 * u));
+  }
+  const curve = new THREE.CatmullRomCurve3(pts);
+  const reed = new THREE.Mesh(
+    new THREE.TubeGeometry(curve, segs, 0.02 + Math.random() * 0.015, 5, false),
+    new THREE.MeshStandardMaterial({
+      color: new THREE.Color().setHSL(0.26, 0.35 + Math.random() * 0.3, 0.18 + Math.random() * 0.1),
+      roughness: 0.9, emissive: 0x0b2a1e, emissiveIntensity: 0.12
+    })
+  );
+  const ang = Math.random() * Math.PI * 2;
+  const rad = 7 + Math.random() * 24;
+  reed.position.set(Math.cos(ang) * rad, -2.4, Math.sin(ang) * rad - 2);
+  reed.userData = { windPhase: Math.random() * Math.PI * 2, windStrength: sway };
+  reedField.add(reed);
+}
+
+/* ==========================================================
+   GENERADORES DE TEXTURAS PROCEDURALES EN ALTA RESOLUCIÓN
+   (idénticos al original)
+   ========================================================== */
+function createBookPageTexture(isLeft) {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 1400;
+  const ctx = c.getContext('2d');
+
+  const bg = ctx.createRadialGradient(512, 700, 100, 512, 700, 800);
+  bg.addColorStop(0, '#FAF5EC');
+  bg.addColorStop(0.7, '#EADBCE');
+  bg.addColorStop(1, isLeft ? '#C7BAA0' : '#BDAC94');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, 1024, 1400);
+
+  const sp = ctx.createLinearGradient(isLeft ? 880 : 0, 0, isLeft ? 1024 : 144, 0);
+  sp.addColorStop(isLeft ? 0 : 1, 'rgba(40, 25, 15, 0)');
+  sp.addColorStop(isLeft ? 1 : 0, 'rgba(30, 18, 10, 0.42)');
+  ctx.fillStyle = sp;
+  ctx.fillRect(isLeft ? 880 : 0, 0, isLeft ? 144 : 144, 1400);
+
+  ctx.strokeStyle = '#8C6F54';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(55, 55, 914, 1290);
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(66, 66, 892, 1268);
+
+  const corners = [[55, 55], [969, 55], [55, 1345], [969, 1345]];
+  ctx.fillStyle = '#8C6F54';
+  corners.forEach(([cx, cy]) => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  if (isLeft) {
+    ctx.fillStyle = '#4A3525';
+    ctx.font = 'bold 40px Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('CRÓNICAS DEL HUMEDAL', 512, 180);
+
+    ctx.font = 'italic 25px "Special Elite", monospace';
+    ctx.fillStyle = '#A47F62';
+    ctx.fillText('LIBRO I: EL DESPERTAR DE LA NINFA', 512, 235);
+
+    ctx.strokeStyle = '#A47F62';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(220, 275); ctx.lineTo(804, 275); ctx.stroke();
+
+    ctx.save();
+    ctx.translate(512, 620);
+    ctx.fillStyle = '#3E2A1D';
+    ctx.beginPath();
+    ctx.ellipse(0, -40, 36, 68, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(0, -125, 30, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#C5A059';
+    ctx.beginPath();
+    ctx.arc(-18, -130, 10, 0, Math.PI * 2);
+    ctx.arc(18, -130, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#5A3D2A';
+    for (let i = 0; i < 8; i++) {
+      ctx.beginPath();
+      ctx.ellipse(0, 38 + i * 36, 28 - i * 2.8, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.strokeStyle = '#3E2A1D';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-10, 330); ctx.quadraticCurveTo(-90, 440, -130, 540);
+    ctx.moveTo(10, 330); ctx.quadraticCurveTo(90, 440, 130, 540);
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(78, 55, 38, 0.55)';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(-20, -50);
+    ctx.bezierCurveTo(-280, -320, -340, -80, -20, 20);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(20, -50);
+    ctx.bezierCurveTo(280, -320, 340, -80, 20, 20);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.font = 'italic 22px Georgia, serif';
+    ctx.fillStyle = '#5A3D2A';
+    ctx.fillText('«El sufrimiento de Efímero es la roca sobre la que descansa', 512, 1210);
+    ctx.fillText('vuestra efímera plenitud.»', 512, 1248);
+    ctx.font = '16px "Special Elite", monospace';
+    ctx.fillStyle = '#8C6F54';
+    ctx.fillText('— ARCHIVOS SECRETOS DE HEMERA · FOLIO 01 —', 512, 1305);
+  } else {
+    ctx.fillStyle = '#4A3525';
+    ctx.font = 'bold 32px Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('I. LA ANATOMÍA DEL ABISMO', 512, 180);
+
+    ctx.strokeStyle = '#A47F62';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(280, 215); ctx.lineTo(744, 215); ctx.stroke();
+
+    ctx.fillStyle = '#8B2500';
+    ctx.fillRect(100, 255, 96, 96);
+    ctx.strokeStyle = '#C5A059';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(100, 255, 96, 96);
+    ctx.fillStyle = '#FFF8EE';
+    ctx.font = 'bold 84px Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('B', 148, 334);
+
+    ctx.fillStyle = '#2C1D11';
+    ctx.font = '22px Georgia, serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('ajo las aguas densas de un humedal en', 215, 290);
+    ctx.fillText('Bogotá, yace "Hemera". Para cualquier ser', 215, 330);
+    ctx.fillText('humano, no existe más que fango podrido por', 100, 395);
+    ctx.fillText('el detrito urbano. Pero abajo resplandece', 100, 435);
+    ctx.fillText('una pesadilla perfecta de cristal orgánico.', 100, 475);
+
+    ctx.fillText('En las profundidades habita EFE. Su cuerpo', 100, 545);
+    ctx.fillText('es una burla genética: tórax arqueado, piel', 100, 585);
+    ctx.fillText('con manchas dinámicas de Rorschach y un par', 100, 625);
+    ctx.fillText('de alas arrugadas que le impiden volar.', 100, 665);
+
+    ctx.fillStyle = 'rgba(139, 37, 0, 0.08)';
+    ctx.fillRect(100, 750, 824, 180);
+    ctx.strokeStyle = '#8B2500';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(100, 750, 824, 180);
+
+    ctx.font = 'bold 20px "Special Elite", monospace';
+    ctx.fillStyle = '#8B2500';
+    ctx.textAlign = 'center';
+    ctx.fillText('LOS DOS MANDAMIENTOS DE NYX', 512, 795);
+    ctx.font = 'bold 22px Georgia, serif';
+    ctx.fillStyle = '#1A0E05';
+    ctx.fillText('1. TU VIDA JUSTIFICA A "HEMERA"', 512, 845);
+    ctx.fillText('2. TU MUERTE PRESERVA A "HEMERA"', 512, 890);
+
+    ctx.textAlign = 'left';
+    ctx.font = '22px Georgia, serif';
+    ctx.fillStyle = '#2C1D11';
+    ctx.fillText('En Hemera no existe la vejez ni la calvicie.', 100, 990);
+    ctx.fillText('Alcanzar la fase adulta exige ascender para', 100, 1030);
+    ctx.fillText('morir a las veinticuatro horas exactas...', 100, 1070);
+
+    ctx.font = '16px "Special Elite", monospace';
+    ctx.fillStyle = '#8C6F54';
+    ctx.textAlign = 'center';
+    ctx.fillText('— 02 —', 512, 1305);
+  }
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.anisotropy = 4;
+  return tex;
+}
+
+function createComicPagesEdgeTexture() {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#E5DEC9';
+  ctx.fillRect(0, 0, 512, 128);
+  ctx.strokeStyle = '#B3A68F';
+  ctx.lineWidth = 1;
+  for (let y = 0; y < 128; y += 3) {
+    ctx.beginPath();
+    ctx.moveTo(0, y); ctx.lineTo(512, y); ctx.stroke();
+  }
+  return new THREE.CanvasTexture(c);
+}
+
+function createComicSpineTexture() {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 1024;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#1A1410';
+  ctx.fillRect(0, 0, 256, 1024);
+  ctx.fillStyle = '#3A281E';
+  ctx.fillRect(0, 0, 16, 1024);
+  ctx.fillRect(240, 0, 16, 1024);
+
+  ctx.save();
+  ctx.translate(128, 512);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = '#E67E22';
+  ctx.font = 'bold 44px "Special Elite", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('RORSCHACH NOCTURNO  ·  VOL. 1', 0, 14);
+  ctx.restore();
+
+  ctx.fillStyle = '#FF007F';
+  ctx.beginPath();
+  ctx.arc(128, 90, 28, 0, Math.PI * 2);
+  ctx.fill();
+
+  return new THREE.CanvasTexture(c);
+}
+
+function createComicInsidePageTexture() {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 1400;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#F2EBDC';
+  ctx.fillRect(0, 0, 1024, 1400);
+
+  ctx.strokeStyle = '#1C1510';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(50, 60, 924, 380);
+  ctx.fillStyle = '#2A1F16';
+  ctx.fillRect(54, 64, 916, 372);
+
+  ctx.strokeRect(50, 470, 445, 860);
+  ctx.fillStyle = '#1E1610';
+  ctx.fillRect(54, 474, 437, 852);
+
+  ctx.strokeRect(525, 470, 449, 860);
+  ctx.fillStyle = '#261C14';
+  ctx.fillRect(529, 474, 441, 852);
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.ellipse(320, 160, 190, 52, 0, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 24px "Special Elite", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('¡EL BIOCHIP ESTÁ ACTIVO!', 320, 168);
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.ellipse(740, 620, 170, 48, 0, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 22px "Special Elite", monospace';
+  ctx.fillText('NO SUBIRÉ A MORIR...', 740, 628);
+
+  return new THREE.CanvasTexture(c);
+}
+
+/* ==========================================================
+   OBJETO 0: BIO-CÁPSULA DEL EFEMERÓPTERO (GÉNESIS)
+   ========================================================== */
+const originGroup = new THREE.Group();
+originGroup.position.set(3.8, 1.8, 4.0);
+
+const capGeo = new THREE.CylinderGeometry(0.85, 0.95, 0.22, 24);
+const capMat = new THREE.MeshStandardMaterial({
+  color: 0x1E293B, metalness: 0.85, roughness: 0.25, emissive: 0x00E5FF, emissiveIntensity: 0.15
+});
+
+const baseCap = new THREE.Mesh(capGeo, capMat);
+baseCap.position.y = -1.2;
+originGroup.add(baseCap);
+
+const topCap = new THREE.Mesh(capGeo, capMat);
+topCap.position.y = 1.2;
+originGroup.add(topCap);
+
+const capRingMat = new THREE.MeshBasicMaterial({ color: 0x00E5FF, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending });
+const baseRing = new THREE.Mesh(new THREE.TorusGeometry(0.9, 0.025, 8, 36), capRingMat);
+baseRing.rotation.x = Math.PI / 2;
+baseRing.position.y = -1.08;
+originGroup.add(baseRing);
+
+const topRing = new THREE.Mesh(new THREE.TorusGeometry(0.9, 0.025, 8, 36), capRingMat);
+topRing.rotation.x = Math.PI / 2;
+topRing.position.y = 1.08;
+originGroup.add(topRing);
+
+const glassGeo = new THREE.CylinderGeometry(0.8, 0.8, 2.2, 24, 1, true);
+const glassMat = new THREE.MeshPhysicalMaterial({
+  color: 0x00E5FF, transmission: 0.85, opacity: 0.35, transparent: true,
+  roughness: 0.1, metalness: 0.1, side: THREE.DoubleSide, depthWrite: false
+});
+const glassCylinder = new THREE.Mesh(glassGeo, glassMat);
+originGroup.add(glassCylinder);
+
+const specimenGroup = new THREE.Group();
+originGroup.add(specimenGroup);
+
+const abdomenMat = new THREE.MeshStandardMaterial({ color: 0xA47F62, roughness: 0.5, emissive: 0xE67E22, emissiveIntensity: 0.25 });
+for (let s = 0; s < 6; s++) {
+  const tSeg = s / 6;
+  const segR = 0.14 * (1 - tSeg * 0.65);
+  const segMesh = new THREE.Mesh(new THREE.SphereGeometry(segR, 12, 12), abdomenMat);
+  segMesh.position.set(0, -0.2 - s * 0.12, -s * 0.04);
+  specimenGroup.add(segMesh);
+}
+
+const thoraxMesh = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.35, 0.22), abdomenMat);
+thoraxMesh.position.set(0, 0.05, 0);
+specimenGroup.add(thoraxMesh);
+
+const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 12), abdomenMat);
+headMesh.position.set(0, 0.26, 0.05);
+specimenGroup.add(headMesh);
+
+const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00E5FF });
+const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), eyeMat);
+leftEye.position.set(-0.1, 0.28, 0.12);
+const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), eyeMat);
+rightEye.position.set(0.1, 0.28, 0.12);
+specimenGroup.add(leftEye, rightEye);
+
+const wingMat = new THREE.MeshPhysicalMaterial({
+  color: 0xE6E1D8, transmission: 0.8, opacity: 0.75, transparent: true,
+  roughness: 0.2, metalness: 0.1, side: THREE.DoubleSide
+});
+
+const leftWing = new THREE.Mesh(new THREE.PlaneGeometry(0.48, 0.8), wingMat);
+leftWing.position.set(-0.25, 0.35, -0.05);
+leftWing.rotation.set(0.25, 0.5, 0.35);
+specimenGroup.add(leftWing);
+
+const rightWing = new THREE.Mesh(new THREE.PlaneGeometry(0.48, 0.8), wingMat);
+rightWing.position.set(0.25, 0.35, -0.05);
+rightWing.rotation.set(0.25, -0.5, -0.35);
+specimenGroup.add(rightWing);
+
+const filamentMat = new THREE.MeshBasicMaterial({ color: 0xFF007F, transparent: true, opacity: 0.8 });
+const fil1 = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.004, 0.7, 6), filamentMat);
+fil1.position.set(-0.05, -1.05, -0.26);
+fil1.rotation.z = -0.15;
+const fil2 = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.004, 0.7, 6), filamentMat);
+fil2.position.set(0.05, -1.05, -0.26);
+fil2.rotation.z = 0.15;
+specimenGroup.add(fil1, fil2);
+
+const scanRing1 = new THREE.Mesh(
+  new THREE.TorusGeometry(0.65, 0.015, 8, 48),
+  new THREE.MeshBasicMaterial({ color: 0x00E5FF, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending })
+);
+originGroup.add(scanRing1);
+
+const scanRing2 = new THREE.Mesh(
+  new THREE.TorusGeometry(0.55, 0.015, 8, 48),
+  new THREE.MeshBasicMaterial({ color: 0xFF007F, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending })
+);
+scanRing2.rotation.x = Math.PI / 3;
+originGroup.add(scanRing2);
+
+const capsuleLight = new THREE.PointLight(0x00E5FF, 2.5, 6);
+originGroup.add(capsuleLight);
+
+registerInteractive(originGroup, 'sec-origen', 'Génesis · El Efemeróptero Disidente', 1.8);
+
+/* ==========================================================
+   MEJORA 5: NINFA EFE — modelo procedural con BRANQUIAS animadas
+   Cuerpo segmentado ondulante + branquias laminares que respiran.
+   Flota junto a la bio-cápsula de la Génesis.
+   ========================================================== */
+const efeNymph = new THREE.Group();
+efeNymph.position.set(3.0, 1.4, 5.1);
+efeNymph.scale.setScalar(0.8);
+
+const chitinMat = new THREE.MeshPhysicalMaterial({
+  color: 0x2a4a2a, roughness: 0.35, metalness: 0.15,
+  transmission: 0.18, thickness: 0.4, emissive: 0x0b2a1e, emissiveIntensity: 0.2
+});
+const nymphSegments = [];
+for (let i = 0; i < 7; i++) {
+  const r = 0.11 - i * 0.009;
+  const seg = (THREE.CapsuleGeometry)
+    ? new THREE.Mesh(new THREE.CapsuleGeometry(r, 0.14, 4, 10), chitinMat)
+    : new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.85, 0.2, 10), chitinMat);
+  seg.position.y = -i * 0.17;
+  seg.userData.i = i;
+  nymphSegments.push(seg);
+  efeNymph.add(seg);
+}
+// Cabeza + ojos compuestos
+const nymphHead = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 12), chitinMat);
+nymphHead.position.y = 0.16;
+efeNymph.add(nymphHead);
+const nymphEyeMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+[-0.08, 0.08].forEach(x => {
+  const e = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), nymphEyeMat);
+  e.position.set(x, 0.2, 0.1);
+  efeNymph.add(e);
+});
+// Branquias laminares traslúcidas
+const gillMat = new THREE.MeshPhysicalMaterial({
+  color: 0x88ccaa, side: THREE.DoubleSide, transparent: true,
+  opacity: 0.65, transmission: 0.5, roughness: 0.25, emissive: 0x10b981, emissiveIntensity: 0.15
+});
+const nymphGills = [];
+for (let i = 0; i < 6; i++) {
+  [-1, 1].forEach(side => {
+    const gill = new THREE.Mesh(new THREE.PlaneGeometry(0.26, 0.12, 1, 1), gillMat);
+    gill.position.set(side * 0.11, -0.02 - i * 0.17, 0);
+    gill.userData = { i, side, phase: Math.random() * Math.PI * 2 };
+    nymphGills.push(gill);
+    efeNymph.add(gill);
+  });
+}
+// Alas tullidas vestigiales
+const nymphWingMat = new THREE.MeshPhysicalMaterial({
+  color: 0xcfd8d8, transmission: 0.7, opacity: 0.5, transparent: true,
+  roughness: 0.4, side: THREE.DoubleSide
+});
+[-1, 1].forEach(side => {
+  const w = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.4), nymphWingMat);
+  w.position.set(side * 0.14, 0.0, -0.1);
+  w.rotation.set(0.3, side * 0.6, side * 0.5);
+  efeNymph.add(w);
+});
+const nymphLight = new THREE.PointLight(0x34d399, 1.2, 3);
+efeNymph.position.y = 1.4;
+efeNymph.add(nymphLight);
+registerInteractive(efeNymph, 'sec-origen', 'EFE · La Ninfa Disidente', 1.4);
+
+/* ==========================================================
+   OBJETO 1: MANUSCRITO ABIERTO HIPERREALISTA
+   ========================================================== */
+const bookGroup = new THREE.Group();
+bookGroup.position.set(-5, 1.5, 0);
+
+const leatherMat = new THREE.MeshStandardMaterial({
+  color: 0x3E2718, roughness: 0.65, metalness: 0.15, emissive: 0x24140A, emissiveIntensity: 0.2
+});
+const brassMat = new THREE.MeshStandardMaterial({
+  color: 0xD4AF37, metalness: 0.9, roughness: 0.25, emissive: 0x785B12, emissiveIntensity: 0.2
+});
+
+const leftPageTex = createBookPageTexture(true);
+const rightPageTex = createBookPageTexture(false);
+const pagesEdgeTex = createComicPagesEdgeTexture();
+
+const leftPageMat = new THREE.MeshStandardMaterial({ map: leftPageTex, roughness: 0.85, metalness: 0.02 });
+const rightPageMat = new THREE.MeshStandardMaterial({ map: rightPageTex, roughness: 0.85, metalness: 0.02 });
+const pageEdgesMat = new THREE.MeshStandardMaterial({ map: pagesEdgeTex, roughness: 0.9 });
+
+const leftCoverGroup = new THREE.Group();
+leftCoverGroup.position.set(-0.72, 0, 0);
+leftCoverGroup.rotation.y = 0.22;
+
+const leftCoverMesh = new THREE.Mesh(new THREE.BoxGeometry(1.42, 1.92, 0.05), leatherMat);
+leftCoverGroup.add(leftCoverMesh);
+
+const leftPagesBlock = new THREE.Mesh(
+  new THREE.BoxGeometry(1.34, 1.84, 0.14),
+  [pageEdgesMat, pageEdgesMat, pageEdgesMat, pageEdgesMat, leftPageMat, leatherMat]
+);
+leftPagesBlock.position.set(0.02, 0, 0.095);
+leftCoverGroup.add(leftPagesBlock);
+
+[[-0.64, 0.88], [-0.64, -0.88]].forEach(([cx, cy]) => {
+  const corner = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.06), brassMat);
+  corner.position.set(cx, cy, 0.01);
+  leftCoverGroup.add(corner);
+});
+
+bookGroup.add(leftCoverGroup);
+
+const rightCoverGroup = new THREE.Group();
+rightCoverGroup.position.set(0.72, 0, 0);
+rightCoverGroup.rotation.y = -0.22;
+
+const rightCoverMesh = new THREE.Mesh(new THREE.BoxGeometry(1.42, 1.92, 0.05), leatherMat);
+rightCoverGroup.add(rightCoverMesh);
+
+const rightPagesBlock = new THREE.Mesh(
+  new THREE.BoxGeometry(1.34, 1.84, 0.14),
+  [pageEdgesMat, pageEdgesMat, pageEdgesMat, pageEdgesMat, rightPageMat, leatherMat]
+);
+rightPagesBlock.position.set(-0.02, 0, 0.095);
+rightCoverGroup.add(rightPagesBlock);
+
+[[0.64, 0.88], [0.64, -0.88]].forEach(([cx, cy]) => {
+  const corner = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.06), brassMat);
+  corner.position.set(cx, cy, 0.01);
+  rightCoverGroup.add(corner);
+});
+
+bookGroup.add(rightCoverGroup);
+
+const spineGeo = new THREE.CylinderGeometry(0.16, 0.16, 1.92, 16, 1, false, Math.PI / 2, Math.PI);
+const spineMesh = new THREE.Mesh(spineGeo, leatherMat);
+spineMesh.position.set(0, 0, -0.05);
+spineMesh.rotation.y = -Math.PI / 2;
+bookGroup.add(spineMesh);
+
+for (let n = -0.6; n <= 0.6; n += 0.4) {
+  const nervio = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.022, 8, 16, Math.PI), brassMat);
+  nervio.position.set(0, n, -0.05);
+  nervio.rotation.x = Math.PI / 2;
+  bookGroup.add(nervio);
+}
+
+// PÁGINA CENTRAL FLOTANTE (con ondulación de vértices por el agua — MEJORA)
+const floatingPageGeo = new THREE.PlaneGeometry(1.3, 1.8, 16, 20);
+floatingPageGeo.userData.basePos = floatingPageGeo.attributes.position.array.slice();
+const floatingPageMat = new THREE.MeshStandardMaterial({
+  map: rightPageTex, side: THREE.DoubleSide, transparent: true, opacity: 0.94, roughness: 0.85
+});
+const floatingPage = new THREE.Mesh(floatingPageGeo, floatingPageMat);
+floatingPage.position.set(0.64, 0, 0.2);
+floatingPage.rotation.y = -0.15;
+bookGroup.add(floatingPage);
+
+const ribbonCurve = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(0, 0.95, 0.05),
+  new THREE.Vector3(0.15, 0.3, 0.22),
+  new THREE.Vector3(0.04, -0.5, 0.24),
+  new THREE.Vector3(0.1, -1.15, 0.18)
+]);
+const ribbonGeo = new THREE.TubeGeometry(ribbonCurve, 20, 0.025, 6, false);
+const ribbonMat = new THREE.MeshStandardMaterial({ color: 0xB91C1C, roughness: 0.3, metalness: 0.3 });
+const ribbonMesh = new THREE.Mesh(ribbonGeo, ribbonMat);
+bookGroup.add(ribbonMesh);
+
+const pendant = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.12, 6), brassMat);
+pendant.position.set(0.1, -1.2, 0.18);
+pendant.rotation.x = Math.PI;
+bookGroup.add(pendant);
+
+const bookGlowLight = new THREE.PointLight(0xF59E0B, 2.2, 5);
+bookGlowLight.position.set(0, 0.2, 0.6);
+bookGroup.add(bookGlowLight);
+
+registerInteractive(bookGroup, 'sec-historia', 'Historia · El Despertar de la Ninfa', 1.5);
+
+/* ==========================================================
+   OBJETO 2: NOVELA GRÁFICA / CÓMIC EN 3D
+   ========================================================== */
+const comicGroup = new THREE.Group();
+comicGroup.position.set(-2.5, 1.8, -1);
+
+const comicSpineTex = createComicSpineTexture();
+const comicInsideTex = createComicInsidePageTexture();
+
+let comicCoverTexture = null;
+try {
+  comicCoverTexture = textureLoader.load('assets/comic_portada.webp');
+} catch(e) {
+  console.warn("Fallo cargando textura del cómic", e);
+}
+
+const comicCoverFrontMat = comicCoverTexture
+  ? new THREE.MeshPhysicalMaterial({
+      map: comicCoverTexture,
+      roughness: 0.22,
+      metalness: 0.1,
+      clearcoat: 0.92,
+      clearcoatRoughness: 0.12,
+      emissive: 0x3E2718,
+      emissiveIntensity: 0.15
+    })
+  : new THREE.MeshStandardMaterial({ color: 0x7A573F, roughness: 0.4 });
+
+const comicInsideMat = new THREE.MeshStandardMaterial({ map: comicInsideTex, roughness: 0.85 });
+const comicSpineMat = new THREE.MeshStandardMaterial({ map: comicSpineTex, roughness: 0.6, metalness: 0.2 });
+
+const comicPagesBlock = new THREE.Mesh(
+  new THREE.BoxGeometry(1.36, 1.92, 0.16),
+  [pageEdgesMat, comicSpineMat, pageEdgesMat, pageEdgesMat, comicInsideMat, comicSpineMat]
+);
+comicGroup.add(comicPagesBlock);
+
+const coverFlapGroup = new THREE.Group();
+coverFlapGroup.position.set(-0.68, 0, 0.08);
+coverFlapGroup.rotation.y = 0.26;
+
+const coverFlapMesh = new THREE.Mesh(
+  new THREE.BoxGeometry(1.36, 1.94, 0.015),
+  [comicSpineMat, comicSpineMat, comicSpineMat, comicSpineMat, comicCoverFrontMat, comicInsideMat]
+);
+coverFlapMesh.position.set(0.68, 0, 0.008);
+coverFlapGroup.add(coverFlapMesh);
+comicGroup.add(coverFlapGroup);
+
+const stapleMat = new THREE.MeshStandardMaterial({ color: 0xE2E8F0, metalness: 0.95, roughness: 0.1 });
+[-0.6, 0.6].forEach(sy => {
+  const staple = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.12, 0.025), stapleMat);
+  staple.position.set(-0.69, sy, 0.04);
+  comicGroup.add(staple);
+});
+
+let distopiaTex = null;
+try { distopiaTex = textureLoader.load('assets/efe_humedal_distopia.jpg'); } catch(e){}
+
+const sheet1Mat = distopiaTex 
+  ? new THREE.MeshPhysicalMaterial({ map: distopiaTex, roughness: 0.3, clearcoat: 0.6, side: THREE.DoubleSide })
+  : new THREE.MeshStandardMaterial({ color: 0x7A573F });
+
+const sheet1Mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.12, 0.76), sheet1Mat);
+sheet1Mesh.position.set(1.4, 0.3, -0.4);
+sheet1Mesh.rotation.set(-0.1, -0.35, 0.05);
+
+const sheet1Frame = new THREE.Mesh(
+  new THREE.BoxGeometry(1.16, 0.8, 0.02),
+  new THREE.MeshStandardMaterial({ color: 0x1A1410, roughness: 0.8 })
+);
+sheet1Frame.position.set(1.4, 0.3, -0.42);
+sheet1Frame.rotation.copy(sheet1Mesh.rotation);
+comicGroup.add(sheet1Frame);
+comicGroup.add(sheet1Mesh);
+
+let sheet2Tex = null;
+try { sheet2Tex = textureLoader.load('assets/efe_reference_sheet.jpg'); } catch(e){}
+
+const sheet2Mat = sheet2Tex
+  ? new THREE.MeshPhysicalMaterial({ map: sheet2Tex, roughness: 0.3, clearcoat: 0.5, transparent: true, opacity: 0.9, side: THREE.DoubleSide })
+  : new THREE.MeshStandardMaterial({ color: 0x4D5E4D });
+
+const sheet2Mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.22, 0.72), sheet2Mat);
+sheet2Mesh.position.set(-1.3, -0.4, -0.5);
+sheet2Mesh.rotation.set(0.12, 0.3, -0.04);
+comicGroup.add(sheet2Mesh);
+
+const comicSpotLight = new THREE.PointLight(0xE67E22, 2.4, 6);
+comicSpotLight.position.set(0, 0.5, 0.8);
+comicGroup.add(comicSpotLight);
+
+registerInteractive(comicGroup, 'sec-comic', 'Cómic · Rorschach Nocturno', 1.8);
+
+/* ==========================================================
+   OBJETO 3: TRANSMISOR ELECTROMAGNÉTICO (PODCAST)
+   ========================================================== */
+const podcastGroup = new THREE.Group();
+podcastGroup.position.set(0, 1.3, 1.5);
+
+const transBodyGeo = new THREE.CylinderGeometry(0.55, 0.65, 0.45, 8);
+const transBodyMat = new THREE.MeshStandardMaterial({
+  color: 0x243328, metalness: 0.85, roughness: 0.35, emissive: 0x10B981, emissiveIntensity: 0.15
+});
+const transBody = new THREE.Mesh(transBodyGeo, transBodyMat);
+podcastGroup.add(transBody);
+
+const membraneGeo = new THREE.CylinderGeometry(0.38, 0.42, 0.08, 24);
+const membraneMat = new THREE.MeshStandardMaterial({
+  color: 0x0f241a, roughness: 0.2, metalness: 0.9, emissive: 0x10B981, emissiveIntensity: 0.4
+});
+const membrane = new THREE.Mesh(membraneGeo, membraneMat);
+membrane.rotation.x = Math.PI / 2;
+membrane.position.set(0, 0, 0.26);
+podcastGroup.add(membrane);
+
+const coilMat = new THREE.MeshStandardMaterial({ color: 0xD97706, metalness: 0.9, roughness: 0.2 });
+for (let c = 0; c < 3; c++) {
+  const coilRing = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.02, 8, 24), coilMat);
+  coilRing.rotation.x = Math.PI / 2;
+  coilRing.position.y = 0.28 + c * 0.08;
+  podcastGroup.add(coilRing);
+}
+
+const antennaGeo = new THREE.CylinderGeometry(0.015, 0.035, 1.3, 8);
+const antennaMat = new THREE.MeshStandardMaterial({ color: 0x8A959D, metalness: 0.9, roughness: 0.15 });
+const antenna = new THREE.Mesh(antennaGeo, antennaMat);
+antenna.position.set(0, 0.85, 0);
+podcastGroup.add(antenna);
+
+const beaconMat = new THREE.MeshBasicMaterial({ color: 0x10B981 });
+const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.065, 8, 8), beaconMat);
+beacon.position.set(0, 1.5, 0);
+podcastGroup.add(beacon);
+
+const soundWaveRings = [];
+for (let w = 0; w < 3; w++) {
+  const waveGeo = new THREE.TorusGeometry(0.5, 0.018, 8, 48);
+  const waveMat = new THREE.MeshBasicMaterial({
+    color: 0x10B981, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending
+  });
+  const waveMesh = new THREE.Mesh(waveGeo, waveMat);
+  waveMesh.rotation.x = Math.PI / 2;
+  waveMesh.position.set(0, 0, 0.26);
+  podcastGroup.add(waveMesh);
+  soundWaveRings.push(waveMesh);
+}
+
+const vuBars = [];
+for (let b = 0; b < 5; b++) {
+  const vuMat = new THREE.MeshBasicMaterial({ color: 0x34D399, transparent: true, opacity: 0.8 });
+  const vuMesh = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.02), vuMat);
+  vuMesh.position.set(0.58, -0.15 + b * 0.08, 0);
+  podcastGroup.add(vuMesh);
+  vuBars.push(vuMesh);
+}
+
+const podcastLight = new THREE.PointLight(0x10B981, 2.5, 8);
+podcastLight.position.set(0, 0.5, 0.6);
+podcastGroup.add(podcastLight);
+
+registerInteractive(podcastGroup, 'sec-podcast', 'Podcast · Frecuencias del Pantano', 1.3);
+
+/* ==========================================================
+   OBJETOS 4 Y 5: RA Y JUEGO
+   ========================================================== */
+makeObj(new THREE.TorusGeometry(0.6, 0.15, 16, 32), 0x8A959D, [2.5, 1.8, -1], 'sec-ar', 'RA');
+makeObj(new THREE.BoxGeometry(1.2, 2, 0.6), 0xE67E22, [5, 1.5, 0], 'sec-juego', 'Videojuego');
+
+/* ==========================================================
+   MEJORA 8: TORRE ZENITH con VENAS HELICOIDALES bioluminiscentes
+   (se mantiene la torre original y se añade una hélice de ADN pulsante)
+   ========================================================== */
+const zenithGroup = new THREE.Group();
+zenithGroup.position.set(0, 0, -10);
+scene.add(zenithGroup);
+
+const crystalMat = new THREE.MeshPhysicalMaterial({
+  color: 0x8A959D, transmission: 0.7, roughness: 0.15, metalness: 0.4,
+  emissive: 0x00E5FF, emissiveIntensity: 0.15, transparent: true, opacity: 0.85
+});
+const metalMat = new THREE.MeshStandardMaterial({
+  color: 0x2B3A5A, roughness: 0.35, metalness: 0.9, emissive: 0x0A1420, emissiveIntensity: 0.2
+});
+
+const zenithTorusRings = [];
+
+const baseLevels = [{ r: 3.2, h: 0.6, y: 0.3 }, { r: 2.6, h: 0.8, y: 1.0 }, { r: 2.0, h: 0.6, y: 1.7 }];
+baseLevels.forEach(({ r, h, y }) => {
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(r, r + 0.15, h, 12), metalMat);
+  base.position.y = y;
+  zenithGroup.add(base);
+
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0x00E5FF, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(r + 0.05, 0.03, 8, 48), ringMat);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = y + h / 2;
+  zenithGroup.add(ring);
+  zenithTorusRings.push(ring);
+});
+
+const bodyHeight = 10;
+const bodySegments = 8;
+for (let i = 0; i < bodySegments; i++) {
+  const t = i / bodySegments;
+  const y = 2.0 + t * bodyHeight;
+  const radius = 1.6 - t * 0.8;
+  const segment = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.92, radius, bodyHeight / bodySegments, 12), crystalMat);
+  segment.position.y = y + (bodyHeight / bodySegments) / 2;
+  zenithGroup.add(segment);
+
+  if (i % 2 === 0) {
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xFF007F, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending });
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(radius + 0.08, 0.025, 8, 48), ringMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = y;
+    zenithGroup.add(ring);
+    zenithTorusRings.push(ring);
+  }
+}
+
+// Venas helicoidales biopunk (DNA-like) que recorren la torre
+const helixCurve = new THREE.Curve();
+helixCurve.getPoint = function(t) {
+  const y = 2.0 + t * bodyHeight;
+  const r = (1.6 - t * 0.8) + 0.12;
+  return new THREE.Vector3(Math.cos(t * Math.PI * 10) * r, y, Math.sin(t * Math.PI * 10) * r);
+};
+const zenithVeinMat = new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending });
+const zenithVein = new THREE.Mesh(new THREE.TubeGeometry(helixCurve, 160, 0.045, 6, false), zenithVeinMat);
+zenithGroup.add(zenithVein);
+
+const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.2, 0.6, 12), metalMat);
+crown.position.y = 2.0 + bodyHeight + 0.3;
+zenithGroup.add(crown);
+
+const spire = new THREE.Mesh(new THREE.ConeGeometry(0.3, 2.5, 8), crystalMat);
+spire.position.y = 2.0 + bodyHeight + 1.8;
+zenithGroup.add(spire);
+
+const core = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.3, 0.3, bodyHeight - 1, 8),
+  new THREE.MeshBasicMaterial({ color: 0xFF007F, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending })
+);
+core.position.y = 2.0 + bodyHeight / 2;
+zenithGroup.add(core);
+
+const orbitDrones = [];
+for (let i = 0; i < 5; i++) {
+  const drone = new THREE.Mesh(
+    new THREE.SphereGeometry(0.06, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0x00E5FF, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending })
+  );
+  drone.userData = { radius: 2.8 + Math.random() * 0.8, speed: 0.4 + Math.random() * 0.3, offset: Math.random() * Math.PI * 2, height: 5 + Math.random() * 7 };
+  zenithGroup.add(drone);
+  orbitDrones.push(drone);
+}
+
+const zenithLight = new THREE.PointLight(0xFF007F, 3, 25);
+zenithLight.position.set(0, 10, -10);
+scene.add(zenithLight);
+
+const zenithLightCyan = new THREE.PointLight(0x00E5FF, 2, 20);
+zenithLightCyan.position.set(0, 4, -10);
+scene.add(zenithLightCyan);
+
+const holo = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), new THREE.MeshBasicMaterial({ color: 0xFF007F, transparent: true, opacity: 0.5, wireframe: true }));
+holo.position.set(0, 16.5, -10);
+scene.add(holo);
+
+const holoRing = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.03, 8, 64), new THREE.MeshBasicMaterial({ color: 0x00E5FF, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending }));
+holoRing.position.set(0, 16.5, -10);
+holoRing.rotation.x = Math.PI / 2;
+scene.add(holoRing);
+
+const holoOuterRing = new THREE.Mesh(
+  new THREE.TorusGeometry(2.4, 0.025, 8, 64),
+  new THREE.MeshBasicMaterial({ color: 0x10B981, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending })
+);
+holoOuterRing.position.set(0, 16.5, -10);
+holoOuterRing.rotation.x = Math.PI / 3;
+scene.add(holoOuterRing);
+
+/* ==========================================================
+   MEJORA 7: POST-PROCESSING (BLOOM + GRANO FÍLMICO)
+   ========================================================== */
+let composer = null, bloomPass = null, filmPass = null;
+function buildComposer() {
+  if (!window.THREE || !THREE.EffectComposer || !THREE.UnrealBloomPass) {
+    postFxEnabled = false;
+    return;
+  }
+  composer = new THREE.EffectComposer(renderer);
+  composer.setSize(innerWidth, innerHeight);
+  composer.addPass(new THREE.RenderPass(scene, camera));
+
+  bloomPass = new THREE.UnrealBloomPass(
+    new THREE.Vector2(innerWidth, innerHeight),
+    0.55,  // strength: halo a la mitad de intensidad (antes 1.1)
+    0.4,   // radius: difusión algo más contenida (antes 0.5)
+    0.6    // threshold: solo los puntos MUY brillantes emiten halo (antes 0.28)
+  );
+  composer.addPass(bloomPass);
+
+  if (THREE.FilmPass) {
+    filmPass = new THREE.FilmPass(0.18, 0.12, 648, false); // grano + scanlines más sutiles
+    filmPass.renderToScreen = true;
+    composer.addPass(filmPass);
+  } else {
+    bloomPass.renderToScreen = true;
+  }
+}
+// (El composer NO se construye al inicio; se difiere hasta que el usuario active FX.)
+
+/* ==========================================================
+   3. GSAP SCROLL Y NAVEGACIÓN (con FOV cinemático — MEJORA)
+   ========================================================= */
+const cameraTarget = new THREE.Vector3(0, 1.5, 0);
+function flyTo(targetPos, offset, fov) {
+  gsap.to(camera.position, { x: targetPos.x + offset.x, y: targetPos.y + offset.y, z: targetPos.z + offset.z, duration: 1.6, ease: 'power3.inOut', overwrite: 'auto' });
+  gsap.to(cameraTarget, { x: targetPos.x, y: targetPos.y, z: targetPos.z, duration: 1.6, ease: 'power3.inOut', overwrite: 'auto' });
+  if (fov) {
+    gsap.to(camera, { fov: fov, duration: 1.6, ease: 'power3.inOut', overwrite: 'auto',
+      onUpdate: () => camera.updateProjectionMatrix() });
+  }
+}
+
+ScrollTrigger.create({
+  scroller: '#scroll-container', trigger: '#hero', start: 'top center',
+  onEnter: () => flyTo({ x: 0, y: 1.5, z: 0 }, { x: 0, y: 2.5, z: 14 }, 60),
+  onEnterBack: () => flyTo({ x: 0, y: 1.5, z: 0 }, { x: 0, y: 2.5, z: 14 }, 60)
+});
+
+[
+  { id: 'sec-origen',    uiLeft: false },
+  { id: 'sec-historia',  uiLeft: true  },
+  { id: 'sec-comic',     uiLeft: false },
+  { id: 'sec-podcast',   uiLeft: true  },
+  { id: 'sec-ar',        uiLeft: false },
+  { id: 'sec-juego',     uiLeft: true  }
+].forEach(sec => {
+  const mesh = objects.find(o => o.userData.id === sec.id);
+  if (!mesh) return;
+  const offX = sec.uiLeft ? -2.5 : 2.5;
+  ScrollTrigger.create({
+    scroller: '#scroll-container', trigger: '#' + sec.id, start: 'top 60%',
+    onEnter: () => flyTo(mesh.position, { x: offX, y: 0.5, z: 4.5 }, 52),
+    onEnterBack: () => flyTo(mesh.position, { x: offX, y: 0.5, z: 4.5 }, 52)
+  });
+});
+
+ScrollTrigger.create({
+  scroller: '#scroll-container', trigger: '#sec-cierre', start: 'top 60%',
+  onEnter: () => flyTo({ x: 0, y: 15.2, z: -10 }, { x: 0, y: 1.8, z: 8.5 }, 54),
+  onEnterBack: () => flyTo({ x: 0, y: 15.2, z: -10 }, { x: 0, y: 1.8, z: 8.5 }, 54)
+});
+
+const returnHemeraBtn = document.getElementById('btn-return-hemera');
+if (returnHemeraBtn) {
+  returnHemeraBtn.addEventListener('click', () => {
+    const heroEl = document.getElementById('hero');
+    if (heroEl) heroEl.scrollIntoView({ behavior: 'smooth' });
+    flyTo({ x: 0, y: 1.5, z: 0 }, { x: 0, y: 2.5, z: 14 }, 60);
+  });
+}
+
+document.querySelectorAll('.hud-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.dataset.target;
+    const targetEl = document.getElementById(targetId);
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+});
+
+/* ==========================================================
+   4. RAYCASTING SEGURO + PUNTERO REACTIVO
+   ========================================================== */
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let hoveredRoot = null;
+
+function setHighlight(obj, active) {
+  if (!obj) return;
+  obj.traverse(child => {
+    if (child.isMesh && child.material && child.material.emissive) {
+      child.material.emissiveIntensity = active ? 0.85 : (child.userData.baseEmissive || 0.2);
+    }
+  });
+}
+
+function findInteractiveRoot(mesh) {
+  let curr = mesh;
+  while (curr) {
+    if (curr.userData && curr.userData.id) return curr;
+    if (!curr.parent || curr.parent === scene) break;
+    curr = curr.parent;
+  }
+  return null;
+}
+
+document.addEventListener('pointermove', (e) => {
+  mouse.x = (e.clientX / innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+  pointerNDC.set(mouse.x, mouse.y);
+
+  // Posición mundial aproximada para la bioluminiscencia reactiva
+  pointerRay.setFromCamera(pointerNDC, camera);
+  pointerRay.ray.intersectPlane(interactionPlane, pointerWorld);
+
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(objects, true);
+  if (hits.length > 0) {
+    const root = findInteractiveRoot(hits[0].object);
+    if (root && hoveredRoot !== root) {
+      if (hoveredRoot) setHighlight(hoveredRoot, false);
+      hoveredRoot = root;
+      setHighlight(hoveredRoot, true);
+      document.body.style.cursor = 'pointer';
+    }
+  } else {
+    if (hoveredRoot) {
+      setHighlight(hoveredRoot, false);
+      hoveredRoot = null;
+    }
+    document.body.style.cursor = 'default';
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#scroll-container') || e.target.closest('#modal') || e.target.closest('#transmedia-hud') || e.target.closest('#gfx-toggle')) return;
+  if (hoveredRoot && hoveredRoot.userData.id) {
+    const el = document.getElementById(hoveredRoot.userData.id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
+
+/* ==========================================================
+   5. SISTEMA DE MODAL & CONTROLADOR DEL PODCAST
+   ========================================================== */
+const modal = document.getElementById('modal');
+const modalContent = document.getElementById('modal-content');
+
+function formatAudioTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+}
+
+function initPodcastPlayer() {
+  const audio = document.getElementById('podcast-audio');
+  const toggleBtn = document.getElementById('podcast-toggle-btn');
+  const progressBar = document.getElementById('podcast-progress-fill');
+  const timelineWrapper = document.getElementById('podcast-timeline-bar');
+  const currentTimeEl = document.getElementById('podcast-current-time');
+  const totalTimeEl = document.getElementById('podcast-total-time');
+  const stateText = document.getElementById('player-state-text');
+  const eqContainer = document.getElementById('podcast-eq');
+
+  if (!audio) return;
+  currentPodcastAudio = audio;
+
+  audio.addEventListener('loadedmetadata', () => {
+    if (totalTimeEl && !isNaN(audio.duration)) {
+      totalTimeEl.textContent = formatAudioTime(audio.duration);
+    }
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    if (!isNaN(audio.duration) && audio.duration > 0) {
+      const progress = (audio.currentTime / audio.duration) * 100;
+      if (progressBar) progressBar.style.width = progress + '%';
+      if (currentTimeEl) currentTimeEl.textContent = formatAudioTime(audio.currentTime);
+    }
+  });
+
+  toggleBtn.addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play().then(() => {
+        toggleBtn.innerHTML = '⏸';
+        stateText.textContent = 'TRANSMITIENDO SEÑAL ACTIVA...';
+        stateText.style.color = '#34D399';
+        eqContainer.classList.add('is-playing');
+        isPodcastAudioPlaying = true;
+      }).catch(err => console.log('Audio autoplay prevented:', err));
+    } else {
+      audio.pause();
+      toggleBtn.innerHTML = '▶';
+      stateText.textContent = 'SEÑAL EN PAUSA';
+      stateText.style.color = '#F59E0B';
+      eqContainer.classList.remove('is-playing');
+      isPodcastAudioPlaying = false;
+    }
+  });
+
+  audio.addEventListener('ended', () => {
+    toggleBtn.innerHTML = '▶';
+    stateText.textContent = 'TRANSMISIÓN FINALIZADA';
+    eqContainer.classList.remove('is-playing');
+    isPodcastAudioPlaying = false;
+    if (progressBar) progressBar.style.width = '100%';
+  });
+
+  if (timelineWrapper) {
+    timelineWrapper.addEventListener('click', (e) => {
+      const rect = timelineWrapper.getBoundingClientRect();
+      const clickPos = (e.clientX - rect.left) / rect.width;
+      if (!isNaN(audio.duration)) {
+        audio.currentTime = clickPos * audio.duration;
+      }
+    });
+  }
+}
+
+window.seekPodcast = function(seconds) {
+  if (currentPodcastAudio) {
+    currentPodcastAudio.currentTime = seconds;
+    if (currentPodcastAudio.paused) {
+      const toggleBtn = document.getElementById('podcast-toggle-btn');
+      if (toggleBtn) toggleBtn.click();
+    }
+  }
+};
+
+/* ==========================================================
+   5B. CONTROLADOR DE VISOR PDF INTERACTIVO (RELATO & CÓMIC)
+   ========================================================== */
+if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'assets/pdf.worker.min.js';
+}
+
+const PDF_CONFIGS = {
+  historia: {
+    url: 'assets/relato.pdf',
+    getBase64: () => window.RELATO_PDF_BASE64 || null,
+    label: 'RELATO.PDF'
+  },
+  comic: {
+    url: 'assets/EFE.pdf',
+    getBase64: () => window.COMIC_PDF_BASE64 || null,
+    label: 'EFE.PDF'
+  }
+};
+
+let activePdfState = null;
+
+function base64ToUint8Array(base64) {
+  const raw = atob(base64);
+  const uint8 = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) {
+    uint8[i] = raw.charCodeAt(i);
+  }
+  return uint8;
+}
+
+window.switchProductSubView = function(productKey, subView) {
+  const pdfBox = document.getElementById('subview-pdf-' + productKey);
+  const webBox = document.getElementById('subview-web-' + productKey);
+  const tabPdf = document.getElementById('tab-pdf-' + productKey);
+  const tabWeb = document.getElementById('tab-web-' + productKey);
+  if (!pdfBox || !webBox) return;
+
+  if (subView === 'pdf') {
+    pdfBox.style.display = 'block';
+    webBox.style.display = 'none';
+    if (tabPdf) tabPdf.classList.add('active');
+    if (tabWeb) tabWeb.classList.remove('active');
+  } else {
+    pdfBox.style.display = 'none';
+    webBox.style.display = 'block';
+    if (tabPdf) tabPdf.classList.remove('active');
+    if (tabWeb) tabWeb.classList.add('active');
+  }
+};
+
+async function renderSinglePdfPage(state, pageNum) {
+  if (!state || !state.pdfDoc) return;
+  const viewportEl = document.getElementById('pdf-viewport-' + state.key);
+  if (!viewportEl) return;
+
+  state.renderToken = (state.renderToken || 0) + 1;
+  const token = state.renderToken;
+
+  viewportEl.innerHTML = `<div class="pdf-loading-state">RENDERIZANDO PÁGINA ${pageNum} DE ${state.numPages}...</div>`;
+
+  try {
+    const page = await state.pdfDoc.getPage(pageNum);
+    if (token !== state.renderToken) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const baseViewport = page.getViewport({ scale: 1 });
+    const containerWidth = Math.max(320, (viewportEl.clientWidth || 780) - 48);
+    const fitScale = Math.min(1.55, containerWidth / baseViewport.width);
+    const finalScale = fitScale * state.zoom;
+    const viewport = page.getViewport({ scale: finalScale * dpr });
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    canvas.style.width = Math.floor(viewport.width / dpr) + 'px';
+    canvas.style.height = Math.floor(viewport.height / dpr) + 'px';
+
+    viewportEl.innerHTML = '';
+    viewportEl.appendChild(canvas);
+    viewportEl.scrollTop = 0;
+
+    await page.render({ canvasContext: ctx, viewport }).promise;
+  } catch (err) {
+    console.error('Error renderizando página PDF:', err);
+    viewportEl.innerHTML = `<iframe class="pdf-native-frame" src="${state.blobUrl || state.url}#page=${pageNum}" title="${state.label}"></iframe>`;
+  }
+}
+
+async function renderCascadePdfPages(state) {
+  if (!state || !state.pdfDoc) return;
+  const viewportEl = document.getElementById('pdf-viewport-' + state.key);
+  if (!viewportEl) return;
+
+  state.renderToken = (state.renderToken || 0) + 1;
+  const token = state.renderToken;
+
+  viewportEl.innerHTML = `<div class="pdf-loading-state">PREPARANDO ${state.numPages} PÁGINAS EN CASCADA...</div>`;
+
+  try {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    const containerWidth = Math.max(320, (viewportEl.clientWidth || 780) - 48);
+    viewportEl.innerHTML = '';
+
+    for (let p = 1; p <= state.numPages; p++) {
+      if (token !== state.renderToken) return;
+      const page = await state.pdfDoc.getPage(p);
+      const baseViewport = page.getViewport({ scale: 1 });
+      const fitScale = Math.min(1.45, containerWidth / baseViewport.width);
+      const viewport = page.getViewport({ scale: fitScale * state.zoom * dpr });
+
+      const wrapper = document.createElement('div');
+      wrapper.id = `pdf-cascade-page-${state.key}-${p}`;
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.gap = '0.4rem';
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      canvas.style.width = Math.floor(viewport.width / dpr) + 'px';
+      canvas.style.height = Math.floor(viewport.height / dpr) + 'px';
+
+      const badge = document.createElement('span');
+      badge.className = 'pdf-page-indicator';
+      badge.style.fontSize = '0.72rem';
+      badge.textContent = `— PÁGINA ${p} DE ${state.numPages} —`;
+
+      wrapper.appendChild(canvas);
+      wrapper.appendChild(badge);
+      viewportEl.appendChild(wrapper);
+
+      await page.render({ canvasContext: ctx, viewport }).promise;
+    }
+  } catch (err) {
+    console.error('Error en modo cascada PDF:', err);
+  }
+}
+
+function renderNativePdfFrame(state) {
+  const viewportEl = document.getElementById('pdf-viewport-' + state.key);
+  if (!viewportEl) return;
+  state.renderToken = (state.renderToken || 0) + 1;
+  viewportEl.style.padding = '0';
+  const srcUrl = state.blobUrl || state.url;
+  viewportEl.innerHTML = `<iframe class="pdf-native-frame" src="${srcUrl}#toolbar=1&navpanes=0" title="${state.label}"></iframe>`;
+}
+
+function updatePdfUiControls(state) {
+  const pageInfo = document.getElementById('pdf-page-info-' + state.key);
+  const prevBtn = document.getElementById('pdf-prev-' + state.key);
+  const nextBtn = document.getElementById('pdf-next-' + state.key);
+  const zoomVal = document.getElementById('pdf-zoom-val-' + state.key);
+  const btnSingle = document.getElementById('pdf-mode-single-' + state.key);
+  const btnScroll = document.getElementById('pdf-mode-scroll-' + state.key);
+  const btnNative = document.getElementById('pdf-mode-native-' + state.key);
+  const pillsBox = document.getElementById('pdf-pills-' + state.key);
+
+  if (pageInfo) pageInfo.textContent = `PÁG. ${state.page} / ${state.numPages}`;
+  if (prevBtn) prevBtn.disabled = (state.mode !== 'single' || state.page <= 1);
+  if (nextBtn) nextBtn.disabled = (state.mode !== 'single' || state.page >= state.numPages);
+  if (zoomVal) zoomVal.textContent = Math.round(state.zoom * 100) + '%';
+
+  if (btnSingle) btnSingle.classList.toggle('active-mode', state.mode === 'single');
+  if (btnScroll) btnScroll.classList.toggle('active-mode', state.mode === 'scroll');
+  if (btnNative) btnNative.classList.toggle('active-mode', state.mode === 'native');
+
+  if (pillsBox) {
+    pillsBox.querySelectorAll('.pdf-page-pill').forEach((pill, idx) => {
+      pill.classList.toggle('active', idx + 1 === state.page);
+    });
+  }
+}
+
+function refreshPdfView(state) {
+  const viewportEl = document.getElementById('pdf-viewport-' + state.key);
+  if (viewportEl && state.mode !== 'native') {
+    viewportEl.style.padding = '1.5rem 1rem';
+  }
+  updatePdfUiControls(state);
+  if (state.mode === 'single') {
+    renderSinglePdfPage(state, state.page);
+  } else if (state.mode === 'scroll') {
+    renderCascadePdfPages(state);
+  } else if (state.mode === 'native') {
+    renderNativePdfFrame(state);
+  }
+}
+
+async function initPdfViewer(productKey) {
+  const cfg = PDF_CONFIGS[productKey];
+  if (!cfg) return;
+
+  const state = {
+    key: productKey,
+    url: cfg.url,
+    label: cfg.label,
+    pdfDoc: null,
+    blobUrl: null,
+    page: 1,
+    numPages: 1,
+    zoom: 1.0,
+    mode: 'single',
+    renderToken: 0
+  };
+  activePdfState = state;
+
+  const prevBtn = document.getElementById('pdf-prev-' + productKey);
+  const nextBtn = document.getElementById('pdf-next-' + productKey);
+  const btnSingle = document.getElementById('pdf-mode-single-' + productKey);
+  const btnScroll = document.getElementById('pdf-mode-scroll-' + productKey);
+  const btnNative = document.getElementById('pdf-mode-native-' + productKey);
+  const zoomOutBtn = document.getElementById('pdf-zoom-out-' + productKey);
+  const zoomInBtn = document.getElementById('pdf-zoom-in-' + productKey);
+  const fsBtn = document.getElementById('pdf-fullscreen-' + productKey);
+  const pillsBox = document.getElementById('pdf-pills-' + productKey);
+  const shellEl = document.getElementById('pdf-shell-' + productKey);
+
+  try {
+    const b64 = cfg.getBase64 ? cfg.getBase64() : null;
+    let docSource = cfg.url;
+    if (b64) {
+      const bytes = base64ToUint8Array(b64);
+      try {
+        state.blobUrl = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+      } catch (e) {}
+      docSource = { data: bytes };
+    }
+
+    if (!window.pdfjsLib) {
+      state.mode = 'native';
+      refreshPdfView(state);
+      return;
+    }
+
+    const loadingTask = window.pdfjsLib.getDocument(docSource);
+    state.pdfDoc = await loadingTask.promise;
+    state.numPages = state.pdfDoc.numPages;
+
+    if (pillsBox) {
+      pillsBox.innerHTML = `<span style="font-size:0.72rem; color:var(--wing); margin-right:0.4rem; text-transform:uppercase; letter-spacing:0.08em;">Ir a página:</span>`;
+      for (let i = 1; i <= state.numPages; i++) {
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'pdf-page-pill' + (i === 1 ? ' active' : '');
+        pill.textContent = i;
+        pill.addEventListener('click', () => {
+          state.page = i;
+          if (state.mode === 'scroll') {
+            const target = document.getElementById(`pdf-cascade-page-${productKey}-${i}`);
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            updatePdfUiControls(state);
+          } else {
+            state.mode = 'single';
+            refreshPdfView(state);
+          }
+        });
+        pillsBox.appendChild(pill);
+      }
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        if (state.page > 1) {
+          state.page--;
+          refreshPdfView(state);
+        }
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        if (state.page < state.numPages) {
+          state.page++;
+          refreshPdfView(state);
+        }
+      });
+    }
+    if (btnSingle) {
+      btnSingle.addEventListener('click', () => {
+        state.mode = 'single';
+        refreshPdfView(state);
+      });
+    }
+    if (btnScroll) {
+      btnScroll.addEventListener('click', () => {
+        state.mode = 'scroll';
+        refreshPdfView(state);
+      });
+    }
+    if (btnNative) {
+      btnNative.addEventListener('click', () => {
+        state.mode = 'native';
+        refreshPdfView(state);
+      });
+    }
+    if (zoomOutBtn) {
+      zoomOutBtn.addEventListener('click', () => {
+        state.zoom = Math.max(0.6, +(state.zoom - 0.15).toFixed(2));
+        if (state.mode !== 'native') refreshPdfView(state);
+      });
+    }
+    if (zoomInBtn) {
+      zoomInBtn.addEventListener('click', () => {
+        state.zoom = Math.min(2.2, +(state.zoom + 0.15).toFixed(2));
+        if (state.mode !== 'native') refreshPdfView(state);
+      });
+    }
+    if (fsBtn && shellEl) {
+      fsBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          shellEl.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+    }
+
+    refreshPdfView(state);
+  } catch (err) {
+    console.warn('Fallback a visor nativo para ' + cfg.label, err);
+    state.mode = 'native';
+    refreshPdfView(state);
+  }
+}
+
+function openProductModal(productKey) {
+  const p = PRODUCTS[productKey];
+  if (!p) return;
+  modalContent.innerHTML = p.html;
+  modal.classList.add('open');
+
+  if (productKey === 'podcast') {
+    initPodcastPlayer();
+  } else if (productKey === 'historia' || productKey === 'comic') {
+    initPdfViewer(productKey);
+  }
+}
+
+document.querySelectorAll('.open-modal').forEach(btn => {
+  btn.addEventListener('click', () => {
+    openProductModal(btn.dataset.product);
+  });
+});
+
+function closeModal() {
+  modal.classList.remove('open');
+  if (activePdfState && activePdfState.blobUrl) {
+    try { URL.revokeObjectURL(activePdfState.blobUrl); } catch (e) {}
+  }
+  activePdfState = null;
+  if (currentPodcastAudio && !currentPodcastAudio.paused) {
+    currentPodcastAudio.pause();
+    isPodcastAudioPlaying = false;
+    const eq = document.getElementById('podcast-eq');
+    if (eq) eq.classList.remove('is-playing');
+  }
+}
+
+document.getElementById('close-modal').addEventListener('click', closeModal);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+  } else if (modal.classList.contains('open') && activePdfState && activePdfState.mode === 'single') {
+    if (e.key === 'ArrowRight' && activePdfState.page < activePdfState.numPages) {
+      activePdfState.page++;
+      refreshPdfView(activePdfState);
+    } else if (e.key === 'ArrowLeft' && activePdfState.page > 1) {
+      activePdfState.page--;
+      refreshPdfView(activePdfState);
+    }
+  }
+});
+modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+/* ==========================================================
+   TOGGLE DE EFECTOS GRÁFICOS (NUEVO)
+   ========================================================== */
+const gfxToggleBtn = document.getElementById('gfx-toggle');
+if (gfxToggleBtn) {
+  // Opción A: siempre arrancamos en BÁSICO (el composer se difiere).
+  gfxToggleBtn.textContent = '✦ FX: BÁSICO';
+  // En dispositivos donde QUALITY.postfx es falso (móvil / reduced-motion),
+  // marcamos el botón como no recomendado, pero seguimos permitiendo activarlo.
+  if (!QUALITY.postfx) gfxToggleBtn.title = 'Post-procesado (puede afectar el rendimiento en este dispositivo)';
+
+  gfxToggleBtn.addEventListener('click', () => {
+    if (postFxEnabled) {
+      // Apagar: volver al render directo.
+      postFxEnabled = false;
+      gfxToggleBtn.textContent = '✦ FX: BÁSICO';
+      return;
+    }
+    // Encender: los scripts de post-FX son diferidos; puede que aún no estén listos.
+    if (!window.THREE || !THREE.EffectComposer || !THREE.UnrealBloomPass) {
+      gfxToggleBtn.textContent = '✦ FX: CARGANDO…';
+      setTimeout(() => { if (!postFxEnabled) gfxToggleBtn.textContent = '✦ FX: BÁSICO'; }, 1200);
+      return;
+    }
+    if (!composer) buildComposer();       // construcción perezosa (una sola vez)
+    postFxEnabled = (composer != null);   // true solo si se construyó correctamente
+    gfxToggleBtn.textContent = postFxEnabled ? '✦ FX: ALTO' : '✦ FX: BÁSICO';
+  });
+}
+
+/* ==========================================================
+   6. BUCLE DE ANIMACIÓN (con todas las mejoras)
+   ========================================================== */
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  /* Objetos flotando */
+  objects.forEach((o, i) => {
+    o.position.y = o.userData.baseY + Math.sin(t * 1.5 + i) * 0.18;
+    o.rotation.y += 0.004;
+  });
+
+  /* MEJORA 1: agua / fango */
+  waterUniforms.uTime.value = t;
+
+  /* MEJORA 2: partículas bioluminiscentes reactivas */
+  {
+    const arr = particles.geometry.attributes.position.array;
+    for (let i = 0; i < pCount; i++) {
+      const ix = i * 3;
+      // deriva lenta ascendente
+      arr[ix + 1] += 0.004 + Math.sin(t * 0.5 + pPhase[i]) * 0.002;
+      if (arr[ix + 1] > 16) arr[ix + 1] = 0;
+      // repulsión suave del cursor (organismos que huyen)
+      const dx = arr[ix]     - pointerWorld.x;
+      const dy = arr[ix + 1] - pointerWorld.y;
+      const dz = arr[ix + 2] - pointerWorld.z;
+      const d2 = dx*dx + dy*dy + dz*dz;
+      if (d2 < 9) {
+        const f = (1 - d2 / 9) * 0.06;
+        const inv = 1 / Math.sqrt(d2 + 0.001);
+        arr[ix]     += dx * inv * f;
+        arr[ix + 1] += dy * inv * f;
+        arr[ix + 2] += dz * inv * f;
+      }
+    }
+    particles.geometry.attributes.position.needsUpdate = true;
+    // pulso global de opacidad
+    particles.material.opacity = 0.55 + Math.sin(t * 1.5) * 0.2;
+    particles.rotation.y = t * 0.018;
+  }
+
+  /* MEJORA 3: burbujas de fango instanciadas */
+  for (let i = 0; i < bubbleCount; i++) {
+    const b = bubbleData[i];
+    b.y += b.speed;
+    b.x += Math.sin(t * 1.6 + b.phase) * 0.004;
+    if (b.y > -2.2) { b.y = -2 - Math.random() * 20; b.x = (Math.random() - 0.5) * 42; b.z = (Math.random() - 0.5) * 42; }
+    const squash = b.y > -4 ? 1 + (b.y + 4) * 0.12 : 1; // se achata cerca de la superficie
+    _bPos.set(b.x, b.y, b.z);
+    _bScl.set(b.scale, b.scale * squash, b.scale);
+    _bMat.compose(_bPos, _bQuat, _bScl);
+    bubbleMesh.setMatrixAt(i, _bMat);
+  }
+  bubbleMesh.instanceMatrix.needsUpdate = true;
+
+  /* MEJORA 4: cañaverales con viento */
+  const breeze = 0.6 + Math.sin(t * 0.4) * 0.4;
+  reedField.children.forEach(reed => {
+    const d = reed.userData;
+    reed.rotation.z = Math.sin(t * 0.9 + d.windPhase) * d.windStrength * breeze;
+    reed.rotation.x = Math.cos(t * 0.7 + d.windPhase) * d.windStrength * 0.5 * breeze;
+  });
+
+  /* BIO-CÁPSULA (GÉNESIS) */
+  leftWing.rotation.y = 0.5 + Math.sin(t * 4) * 0.18;
+  rightWing.rotation.y = -0.5 - Math.sin(t * 4) * 0.18;
+  specimenGroup.position.y = Math.sin(t * 2) * 0.06;
+  scanRing1.rotation.z = t * 0.55;
+  scanRing1.rotation.x = Math.sin(t * 0.7) * 0.3;
+  scanRing2.rotation.y = -t * 0.75;
+  scanRing2.rotation.z = Math.cos(t * 0.6) * 0.4;
+  capsuleLight.intensity = 2.2 + Math.sin(t * 3) * 0.8;
+
+  /* MEJORA 5: NINFA EFE — branquias que respiran + cuerpo ondulante */
+  nymphSegments.forEach((seg, i) => {
+    seg.position.x = Math.sin(t * 1.6 - i * 0.5) * 0.05;
+    seg.rotation.z = Math.sin(t * 1.6 - i * 0.5) * 0.14;
+  });
+  nymphGills.forEach(gill => {
+    const { i, side, phase } = gill.userData;
+    gill.rotation.z = side * (0.5 + Math.sin(t * 3 + i * 0.5 + phase) * 0.3);
+    gill.scale.y = 1 + Math.sin(t * 3 + phase) * 0.15;
+  });
+  nymphLight.intensity = 1.0 + Math.sin(t * 2.4) * 0.5;
+
+  /* LIBRO: página flotante con ondulación real de vértices (MEJORA) */
+  {
+    const g = floatingPage.geometry;
+    const pos = g.attributes.position;
+    const base = g.userData.basePos;
+    for (let i = 0; i < pos.count; i++) {
+      const bx = base[i*3], by = base[i*3+1];
+      pos.array[i*3+2] = Math.sin(bx * 2.0 + t * 1.8) * 0.04 + Math.cos(by * 1.6 + t * 1.3) * 0.03;
+    }
+    pos.needsUpdate = true;
+    g.computeVertexNormals();
+  }
+  floatingPage.rotation.y = -0.15 + Math.sin(t * 1.6) * 0.12;
+  bookGlowLight.intensity = 1.9 + Math.sin(t * 2.2) * 0.5;
+
+  /* CÓMIC */
+  coverFlapGroup.rotation.y = 0.26 + Math.sin(t * 1.7) * 0.06;
+  sheet1Mesh.position.y = 0.3 + Math.sin(t * 1.4 + 1) * 0.07;
+  sheet1Frame.position.y = sheet1Mesh.position.y;
+  sheet2Mesh.position.y = -0.4 + Math.cos(t * 1.5) * 0.06;
+  comicSpotLight.intensity = 2.1 + Math.cos(t * 2) * 0.5;
+
+  /* TRANSMISOR (PODCAST) */
+  const waveSpeed = isPodcastAudioPlaying ? 1.6 : 0.8;
+  soundWaveRings.forEach((ring, i) => {
+    const cycle = ((t * waveSpeed + i * 0.33) % 1);
+    const scale = 0.35 + cycle * 2.5;
+    ring.scale.set(scale, scale, scale);
+    ring.material.opacity = Math.max(0, (1 - cycle) * (isPodcastAudioPlaying ? 0.95 : 0.6));
+    ring.position.z = 0.26 + cycle * 0.7;
+  });
+
+  beacon.scale.setScalar(1 + Math.sin(t * (isPodcastAudioPlaying ? 14 : 7)) * 0.25);
+  beaconMat.color.setHex(isPodcastAudioPlaying ? 0x00E5FF : 0x10B981);
+  membrane.scale.setScalar(1 + Math.sin(t * (isPodcastAudioPlaying ? 12 : 5)) * 0.04);
+  podcastLight.intensity = (isPodcastAudioPlaying ? 3.5 : 2.0) + Math.sin(t * 8) * 0.8;
+
+  vuBars.forEach((vb, idx) => {
+    const lit = (Math.sin(t * (isPodcastAudioPlaying ? 15 : 6) + idx * 0.8) + 1) * 0.5;
+    vb.material.opacity = 0.2 + lit * 0.8;
+    vb.scale.y = 0.4 + lit * 1.2;
+  });
+
+  /* Holograma */
+  holo.rotation.y = t * 0.45;
+  holo.rotation.x = Math.sin(t * 0.7) * 0.18;
+  holo.scale.setScalar(1 + Math.sin(t * 2.5) * 0.1);
+  holoRing.rotation.z = t * 0.7;
+  holoOuterRing.rotation.y = -t * 0.5;
+  holoOuterRing.rotation.z = Math.sin(t * 0.8) * 0.35;
+
+  /* Niebla y luces ambientales */
+  scene.fog.density = 0.045 + Math.sin(t * 0.35) * 0.006;
+  pCyan.intensity = 2.2 + Math.cos(t * 1.6) * 0.7;
+  pPink.intensity = 2.6 + Math.sin(t * 1.9) * 0.9;
+
+  /* Torre Zenith + vena helicoidal pulsante */
+  zenithGroup.rotation.y = t * 0.06;
+  spire.scale.setScalar(1 + Math.sin(t * 2) * 0.04);
+  core.material.opacity = 0.4 + Math.sin(t * 2.8) * 0.25;
+  zenithVeinMat.opacity = 0.45 + Math.sin(t * 1.8) * 0.3;
+
+  zenithTorusRings.forEach((ring, i) => {
+    ring.material.opacity = 0.35 + Math.sin(t * 2.4 + i * 0.6) * 0.45;
+  });
+
+  orbitDrones.forEach((drone, i) => {
+    const d = drone.userData;
+    const angle = t * d.speed + d.offset;
+    drone.position.x = Math.cos(angle) * d.radius;
+    drone.position.z = Math.sin(angle) * d.radius;
+    drone.position.y = d.height + Math.sin(t * 2 + i) * 0.4;
+  });
+
+  /* Renderizado — con o sin post-proceso */
+  camera.lookAt(cameraTarget);
+  if (filmPass) filmPass.uniforms.time.value = t;
+  if (postFxEnabled && composer) {
+    composer.render();
+  } else {
+    renderer.render(scene, camera);
+  }
+}
+animate();
+
+/* ==========================================================
+   7. RESIZE Y RESPONSIVIDAD
+   ========================================================== */
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  if (composer) composer.setSize(innerWidth, innerHeight);
+  if (bloomPass) bloomPass.setSize(innerWidth, innerHeight);
+  ScrollTrigger.refresh();
+});
+</script>
+</body>
+</html>
